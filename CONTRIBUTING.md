@@ -3,10 +3,10 @@
 Want to contribute? Great! You can do so through the standard GitHub pull
 request model. For large contributions we do encourage you to file a ticket in
 the GitHub issues tracking system prior to any code development to coordinate
-with the UUV Simulator development team early in the process. Coordinating up
-front helps to avoid frustration later on.  Please do ... :zap: **TODO: add
-any specific non-functional requirements, e.g. test, coding guidelines, etc.
-here.** :zap:
+with the assets2036net development team early in the process. Coordinating up
+front helps to avoid frustration later on. If you added new features or functions, 
+please add a unit test in the assets2036net.unittests project. Otherwise please
+modify the existing unit tests if needed. All tests must pass before you commit. 
 
 Your contribution must be licensed under the Apache-2.0 license, the license
 used by this project.
@@ -91,7 +91,7 @@ Often employers or academic institution have ownership over code that is
 written in certain circumstances, so please do due diligence to ensure that
 you have the right to submit the code.
 
-If you are a developer who is authorized to contribute to UUV Simulator on
+If you are a developer who is authorized to contribute to assets2036net on
 behalf of your employer, then please use your corporate email address in the
 Signed-off-by tag. Otherwise please use a personal email address.
 
@@ -102,7 +102,7 @@ Each contributor is responsible for identifying themselves in the
 Please add the respective information corresponding to the Signed-off-by tag
 as part of your first pull request.
 
-If you are a developer who is authorized to contribute to UUV Simulator on
+If you are a developer who is authorized to contribute to assets2036net on
 behalf of your employer, then add your company / organization to the list of
 copyright holders in the [NOTICE](NOTICE) file. As author of a corporate
 contribution you can also add your name and corporate email address as in the

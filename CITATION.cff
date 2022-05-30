@@ -1,0 +1,24 @@
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
+cff-version: 1.2.0
+title: assets2036net
+message: Please cite this software using these metadata.
+type: software
+authors:
+  - given-names: Thomas Josef
+    family-names: Jung
+    email: mail@thomas-jung.de
+    affiliation: Robert Bosch GmbH
+    orcid: 'https://orcid.org/0000-0001-7044-5556'
+abstract: >-
+  .NET-Standard-library to participate in the
+  assets2036-middleware used in Arena2036
+keywords:
+  - mqtt
+  - json
+  - .net
+  - dotnet
+  - assets2036
+  - arena2036
+license: Apache-2.0

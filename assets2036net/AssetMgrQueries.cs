@@ -82,8 +82,7 @@ namespace assets2036net
 
                     try
                     {
-                        object oSchema;
-                        if (!metaTag.TryGetValue(StringConstants.PropertyNameMetaSubmodelSchema, out oSchema))
+                        if (!metaTag.TryGetValue(StringConstants.PropertyNameMetaSubmodelSchema, out object oSchema))
                         {
                             return Task.CompletedTask;
                         }
@@ -150,8 +149,7 @@ namespace assets2036net
 
                     var topic = new Topic(eventArgs.ApplicationMessage.Topic);
 
-                    HashSet<string> hs;
-                    if (foundAssets.TryGetValue(topic.GetRootTopicName(), out hs))
+                    if (foundAssets.TryGetValue(topic.GetRootTopicName(), out HashSet<string> hs))
                     {
                         hs.Add(topic.GetAssetName());
                     }

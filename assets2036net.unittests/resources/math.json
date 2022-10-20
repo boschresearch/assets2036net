@@ -1,6 +1,6 @@
 {
   "name": "math",
-  "rev": "1.0.0",
+  "revision": "1.0.0",
   "operations": {
     "square": {
       "parameters": {

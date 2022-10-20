@@ -1,6 +1,6 @@
 {
   "name": "simple_operations",
-  "rev": "0.0.1",
+  "revision": "0.0.1",
   "operations": {
     "do_it": {},
     "addnumbers": {

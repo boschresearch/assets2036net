@@ -18,7 +18,7 @@ namespace assets2036net
     /// </summary>
     public class AssetEndpoint
     {
-        Asset _asset; 
+        readonly Asset _asset; 
 
         /// <summary>
         /// a native asset object to access the endpoint submodel. 
@@ -28,7 +28,7 @@ namespace assets2036net
             get { return _asset;  }
         }
 
-        private static log4net.ILog logger = Config.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType.FullName);
+        //private readonly static log4net.ILog logger = Config.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType.FullName);
 
         /// <summary>
         /// the endpoint asset's name

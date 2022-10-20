@@ -119,8 +119,7 @@ namespace assets2036net
         /// <returns>the property named <paramref name="name"/> or null, if not present</returns>
         public SubmodelProperty Property(string name)
         {
-            SubmodelProperty p = null;
-            _properties.TryGetValue(name, out p); 
+            _properties.TryGetValue(name, out SubmodelProperty p);
             return p; 
         }
 
@@ -152,8 +151,7 @@ namespace assets2036net
         /// operation was found</returns>
         public SubmodelOperation Operation(string name)
         {
-            SubmodelOperation op = null;
-            _operations.TryGetValue(name, out op); 
+            _operations.TryGetValue(name, out SubmodelOperation op);
             return op; 
         }
 
@@ -182,8 +180,7 @@ namespace assets2036net
         /// <returns>the event named <paramref name="name"/> or null, if not present</returns>
         public SubmodelEvent Event(string name)
         {
-            SubmodelEvent ev = null;
-            _events.TryGetValue(name, out ev);
+            _events.TryGetValue(name, out SubmodelEvent ev);
             return ev; 
         }
         internal Dictionary<string, SubmodelEvent> _events;
@@ -269,7 +266,7 @@ namespace assets2036net
 
             foreach (var el in Elements)
             {
-                el.Value.populate(assetMgr, asset, this);
+                el.Value.Populate(assetMgr, asset, this);
                 el.Value.Name = el.Key; 
             }
         }

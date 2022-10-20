@@ -24,7 +24,7 @@ namespace assets2036net
     /// </summary>
     public class Asset
     {
-        private static log4net.ILog log = Config.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType.FullName);
+        private readonly static log4net.ILog log = Config.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType.FullName);
 
         //public delegate void HandleConnectivityLost(Asset asset);
         //public event HandleConnectivityLost ConnectivityLost;
@@ -74,8 +74,7 @@ namespace assets2036net
         {
             get
             {
-                Submodel ep = null;
-                _submodels.TryGetValue(StringConstants.SubmodelNameEnpoint, out ep);
+                _submodels.TryGetValue(StringConstants.SubmodelNameEnpoint, out Submodel ep);
                 return ep;
             }
         }

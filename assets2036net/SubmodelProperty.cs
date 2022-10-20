@@ -53,10 +53,7 @@ namespace assets2036net
             {
                 var oldValue = _value;
                 _value = newValue;
-                if (ValueModified != null)
-                {
-                    ValueModified(this, oldValue, _value);
-                }
+                ValueModified?.Invoke(this, oldValue, _value);
             }
         }
 
@@ -95,7 +92,6 @@ namespace assets2036net
 
                 if (value != _value)
                 {
-                    var oldValue = _value;
                     _value = value;
 
                     if (Asset != null)
@@ -198,55 +194,6 @@ namespace assets2036net
             }
         }
 
-
-
-
-        //public SubmodelProperty Property(string name)
-        //{
-        //    SubmodelProperty p = null;
-        //    Properties.TryGetValue(name, out p);
-        //    return p;
-        //}
-
-        //private Dictionary<string, SubmodelProperty> _properties;
-
-        //internal Dictionary<string, SubmodelProperty> Properties
-        //{
-        //    get
-        //    {
-        //        return _properties;
-        //    }
-        //    private set
-        //    {
-        //        _properties = value;
-
-        //        //// every submodel has the meta property: 
-        //        //if (!_properties.ContainsKey(StringConstants.PropertyNameMeta))
-        //        //{
-        //        //    SubmodelProperty _meta = new SubmodelProperty()
-        //        //    {
-        //        //        Name = StringConstants.PropertyNameMeta,
-        //        //        Type = StringConstants.TypeNameComposite
-        //        //    };
-        //        //    Properties.Add(_meta.Name, _meta);
-        //        //}
-        //    }
-        //}
-
-        //[JsonProperty("properties")]
-        //public IList<SubmodelProperty> properties
-        //{
-        //    set
-        //    {
-        //        Properties = new Dictionary<string, SubmodelProperty>();
-
-        //        foreach (var property in value)
-        //        {
-        //            Properties.Add(property.Name, property);
-        //        }
-        //    }
-        //}
-
         internal override ISet<string> getSubscriptions(Mode mode)
         {
             if (mode == Mode.Consumer)
@@ -256,35 +203,5 @@ namespace assets2036net
             }
             else return new HashSet<string>(); 
         }
-
-        //internal override void createSubscriptions(MqttClient mqttClient, Mode mode)
-        //{
-        //    if (mode == Mode.Consumer)
-        //    {
-        //        log.InfoFormat("{0} subscribes to {1}", Name, Topic);
-        //        mqttClient.Subscribe(
-        //            new string[] { Topic },
-        //            new byte[] { uPLibrary.Networking.M2Mqtt.Messages.MqttMsgBase.QOS_LEVEL_EXACTLY_ONCE });
-        //    }
-
-        //    //if (Properties != null)
-        //    //{
-        //    //    foreach (var child in Properties)
-        //    //    {
-        //    //        child.Value.createSubscriptions(mqttClient, mode); 
-        //    //    }
-        //    //}
-        //}
-
-        //internal void AddProperty(SubmodelProperty p)
-        //{
-        //    if (Properties == null)
-        //    {
-        //        Properties = new Dictionary<string, SubmodelProperty>(); 
-        //    }
-
-        //    Properties.Add(p.Name, p); 
-        //}
-
     }
 }

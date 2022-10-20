@@ -1,6 +1,6 @@
 {
   "name": "events",
-  "rev": "0.0.1",
+  "revision": "0.0.1",
   "events": {
     "anevent": {
       "description":  "Hier steht, wann und warum dieser Event passiert.", 

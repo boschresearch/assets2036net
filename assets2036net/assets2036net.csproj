@@ -24,7 +24,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="LICENSE.txt" Pack="true" PackagePath="LICENSE.txt"/>
+    <None Include="LICENSE.txt" Pack="true" PackagePath="LICENSE.txt" />
   </ItemGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -35,16 +35,19 @@
 
   <ItemGroup>
     <None Remove="resources\_endpoint.json" />
+    <None Remove="resources\submodel.schema" />
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="resources\_endpoint.json" />
+    <EmbeddedResource Include="resources\submodel.schema" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="log4net" Version="2.0.13" />
     <PackageReference Include="MQTTnet" Version="3.1.1" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+    <PackageReference Include="NJsonSchema" Version="10.8.0" />
   </ItemGroup>
 
   <ItemGroup>

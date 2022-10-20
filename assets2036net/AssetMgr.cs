@@ -144,7 +144,7 @@ namespace assets2036net
         {
             if (EndpointAsset == null)
             {
-                var ep = _createOwnedAsset(Namespace, _endpointName, new Uri(Config.EndpointSubmodelDescriptionUrl));
+                var ep = _createOwnedAsset(@namespace, _endpointName, new Uri(Config.EndpointSubmodelDescriptionUrl));
                 EndpointAsset = new AssetEndpoint(ep);
                 EndpointAsset.Submodel(StringConstants.SubmodelNameEnpoint).Property(StringConstants.PropertyNameOnline).Value = true;
             }
@@ -196,122 +196,103 @@ namespace assets2036net
             return _createAssetProxy(@namespace, assetName, submodels);
         }
 
-        private ConcurrentDictionary<string, ConcurrentBag<Asset>> _consumerAssets;
-        private ConcurrentDictionary<string, ConcurrentBag<Asset>> _ownerAssets;
+        private readonly ConcurrentDictionary<string, ConcurrentBag<Asset>> _consumerAssets;
+        private readonly ConcurrentDictionary<string, ConcurrentBag<Asset>> _ownerAssets;
 
-        //NJsonSchema.JsonSchema _submodelSchema;
+        private NJsonSchema.JsonSchema _submodelSchema;
 
         private bool validateSubmodel(string json, List<string> errors = null)
         {
-            return true;
+            if (_submodelSchema == null)
+            {
+               string submodelSchema = Config.Assets2036SubmodelSchema;
 
-            //if (!DoJsonValidation)
-            //{
-            //    return true;
-            //}
+               var taskSchema = NJsonSchema.JsonSchema.FromJsonAsync(submodelSchema);
+               _submodelSchema = taskSchema.Result;
+            }
 
-            //if (_submodelSchema == null)
-            //{
-            //    string submodelSchema =
-            //        LoadTextFrom(
-            //            new Uri(
-            //                Config.SubmodelSchemaUrl));
+            bool valid = true;
+            foreach (var error in _submodelSchema.Validate(json))
+            {
+               valid = false;
 
-            //    var taskSchema = NJsonSchema.JsonSchema.FromJsonAsync(submodelSchema);
-            //    _submodelSchema = taskSchema.Result;
-            //}
+               if (errors != null)
+               {
+                   errors.Add(string.Format("{0} at line {1}", error.ToString(), error.LineNumber));
+               }
+            }
 
-            //bool valid = true;
-            //foreach (var error in _submodelSchema.Validate(json))
-            //{
-            //    valid = false;
-
-            //    if (errors != null)
-            //    {
-            //        errors.Add(string.Format("{0} at line {1}", error.ToString(), error.LineNumber));
-            //    }
-            //}
-
-            //return valid;
+            return valid;
         }
 
         private HealthyCheck _healthyCallback;
 
-        Task _taskHealthyCheck = null;
+        // readonly Task _taskHealthyCheck = null;
 
-        private void _healthyCheck()
-        {
-            var endpointConsumer = this.CreateAssetProxy(Namespace, EndpointAsset.Name, new Uri(Config.EndpointSubmodelDescriptionUrl));
+        // private void _healthyCheck()
+        // {
+        //     var endpointConsumer = this.CreateAssetProxy(Namespace, EndpointAsset.Name, new Uri(Config.EndpointSubmodelDescriptionUrl));
 
-            while (_healthyCheckActive)
-            {
-                Thread.Sleep(5000);
-                try
-                {
-                    log.DebugFormat("Enpoint %1: Try to ping myself via mqtt...", endpointConsumer.Name);
+        //     while (_healthyCheckActive)
+        //     {
+        //         Thread.Sleep(5000);
+        //         try
+        //         {
+        //             log.DebugFormat("Enpoint %1: Try to ping myself via mqtt...", endpointConsumer.Name);
 
-                    try
-                    {
-                        endpointConsumer.Submodel(StringConstants.SubmodelNameEnpoint).Operation(StringConstants.OperationNamePing).Invoke(new Dictionary<string, object>(), TimeSpan.FromSeconds(5));
-                    }
-                    catch (TimeoutException te)
-                    {
-                        log.Error(te);
-                        log.Error("Probably Lost subscriptions at MQTT broker.");
+        //             try
+        //             {
+        //                 endpointConsumer.Submodel(StringConstants.SubmodelNameEnpoint).Operation(StringConstants.OperationNamePing).Invoke(new Dictionary<string, object>(), TimeSpan.FromSeconds(5));
+        //             }
+        //             catch (TimeoutException te)
+        //             {
+        //                 log.Error(te);
+        //                 log.Error("Probably Lost subscriptions at MQTT broker.");
 
-                        try
-                        {
-                            LostConnection?.Invoke();
-                        }
-                        catch (Exception e)
-                        {
-                            log.Error(e);
-                        }
+        //                 try
+        //                 {
+        //                     LostConnection?.Invoke();
+        //                 }
+        //                 catch (Exception e)
+        //                 {
+        //                     log.Error(e);
+        //                 }
 
-                        if (AutomaticReconnectOnConnectionLost)
-                        {
-                            // try to connect again... s
-                            log.Info("Try reconnect to mqtt broker with existing client id...");
-                            Connect();
-                        }
-                        else
-                        {
+        //                 if (AutomaticReconnectOnConnectionLost)
+        //                 {
+        //                     // try to connect again... s
+        //                     log.Info("Try reconnect to mqtt broker with existing client id...");
+        //                     Connect();
+        //                 }
+        //                 else
+        //                 {
 
-                        }
-                    }
+        //                 }
+        //             }
 
-                    bool healthy = true;
-                    if (_healthyCallback != null)
-                    {
-                        healthy = _healthyCallback();
-                    }
+        //             bool healthy = true;
+        //             if (_healthyCallback != null)
+        //             {
+        //                 healthy = _healthyCallback();
+        //             }
 
-                    EndpointAsset.SubmodelEndpoint.Property("healthy").Value = healthy;
-                    EndpointAsset.SubmodelEndpoint.Property(StringConstants.PropertyNameOnline).Value = true;
-                }
-                catch (Exception e)
-                {
-                    log.Error(e);
-                    EndpointAsset.SubmodelEndpoint.Property("healthy").Value = false;
-                }
-            }
-        }
+        //             EndpointAsset.SubmodelEndpoint.Property("healthy").Value = healthy;
+        //             EndpointAsset.SubmodelEndpoint.Property(StringConstants.PropertyNameOnline).Value = true;
+        //         }
+        //         catch (Exception e)
+        //         {
+        //             log.Error(e);
+        //             EndpointAsset.SubmodelEndpoint.Property("healthy").Value = false;
+        //         }
+        //     }
+        // }
 
         private List<Submodel> _parseSubmodels(params Uri[] submodelUrls)
         {
             var submodels = new List<Submodel>();
             foreach (Uri submodelUri in submodelUrls)
             {
-                string submodelDefinition = "";
-                try
-                {
-                    submodelDefinition = LoadTextFrom(submodelUri);
-                }
-                catch (Exception)
-                {
-                    log.ErrorFormat("Unable to load submodel definition from {0} {1}", submodelUri, submodelUri);
-                    continue;
-                }
+                var submodelDefinition = LoadTextFrom(submodelUri);
 
                 List<string> errors = new List<string>();
                 if (!validateSubmodel(submodelDefinition, errors))
@@ -342,8 +323,7 @@ namespace assets2036net
             var proxy = _createBaseAsset(@namespace, assetName, submodels);
             proxy.Mode = Mode.Consumer;
 
-            ConcurrentBag<Asset> bag = null;
-            if (!_consumerAssets.TryGetValue(proxy.FullName, out bag))
+            if (!_consumerAssets.TryGetValue(proxy.FullName, out ConcurrentBag<Asset> bag))
             {
                 bag = new ConcurrentBag<Asset>();
                 _consumerAssets.TryAdd(proxy.FullName, bag);
@@ -392,22 +372,24 @@ namespace assets2036net
             foreach (Submodel submodel in asset.Submodels)
             {
                 // add  meta information to submodel: 
-                JObject metaValue = new JObject();
-
-                metaValue.Add(
-                    StringConstants.PropertyNameMetaSubmodelSchema,
-                    submodel._schema);
-
-                metaValue.Add(
-                    StringConstants.PropertyNameMetaSubmodelUrl,
-                    submodel.SubmodelUrl);
-
-                metaValue.Add(
-                    StringConstants.PropertyNameMetaSource,
-                    _endpointName);
+                JObject metaValue = new JObject
+                {
+                    {
+                        StringConstants.PropertyNameMetaSubmodelSchema,
+                        submodel._schema
+                    },
+                    {
+                        StringConstants.PropertyNameMetaSubmodelUrl,
+                        submodel.SubmodelUrl
+                    },
+                    {
+                        StringConstants.PropertyNameMetaSource,
+                        _endpointName
+                    }
+                };
 
                 SubmodelProperty meta = new SubmodelProperty();
-                meta.populate(this, asset, submodel);
+                meta.Populate(this, asset, submodel);
                 meta.Name = StringConstants.PropertyNameMeta;
                 meta.Value = metaValue;
 
@@ -431,7 +413,7 @@ namespace assets2036net
             return asset;
         }
 
-        private static ConcurrentDictionary<Uri, (DateTime, string)> _submodelsCache = new ConcurrentDictionary<Uri, (DateTime, string)>();
+        private readonly static ConcurrentDictionary<Uri, (DateTime, string)> _submodelsCache = new ConcurrentDictionary<Uri, (DateTime, string)>();
 
         private static string LoadTextFrom(Uri locator, bool noSslValidation = true)
         {
@@ -499,7 +481,7 @@ namespace assets2036net
             return text;
         }
 
-        private bool _healthyCheckActive = false;
+        // private readonly bool _healthyCheckActive = false;
 
         //public void Stop()
         //{
@@ -604,7 +586,7 @@ namespace assets2036net
                 .WithCleanSession()
                 .WithWillMessage(
                     messageBuilder
-                    .WithTopic(CommElementBase.buildTopic(
+                    .WithTopic(CommElementBase.BuildTopic(
                         Namespace,
                         _endpointName,
                         StringConstants.SubmodelNameEnpoint,
@@ -640,8 +622,7 @@ namespace assets2036net
 
         internal SubmodelOperationResponse CheckForResponse(string reqId)
         {
-            SubmodelOperationResponse resp = null;
-            if (_mapReqIdResponse.TryRemove(reqId, out resp))
+            if (_mapReqIdResponse.TryRemove(reqId, out SubmodelOperationResponse resp))
             {
                 return resp;
             }
@@ -660,17 +641,17 @@ namespace assets2036net
         //    }
         //}
 
-        private object unpublishedMessagedLock = new object();
+        private readonly object unpublishedMessagedLock = new object();
 
-        private ConcurrentDictionary<ushort, byte> unpublishedMessages = new ConcurrentDictionary<ushort, byte>();
+        private readonly ConcurrentDictionary<ushort, byte> unpublishedMessages = new ConcurrentDictionary<ushort, byte>();
 
-        private static log4net.ILog log = Config.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType.FullName);
+        private readonly static log4net.ILog log = Config.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType.FullName);
 
-        private string _mqttClientId = "assets2036net_" + Guid.NewGuid().ToString();
+        private readonly string _mqttClientId = "assets2036net_" + Guid.NewGuid().ToString();
 
         private readonly string _endpointName;
 
-        private ConcurrentDictionary<string, SubmodelOperationResponse> _mapReqIdResponse;
+        private readonly ConcurrentDictionary<string, SubmodelOperationResponse> _mapReqIdResponse;
 
         //private void Disconnect()
         //{
@@ -739,12 +720,10 @@ namespace assets2036net
 
                     foreach (var asset in assetsBag)
                     {
-                        Submodel submodel;
-                        if (asset._submodels.TryGetValue(topic.GetSubmodelName(), out submodel))
+                        if (asset._submodels.TryGetValue(topic.GetSubmodelName(), out Submodel submodel))
                         {
                             // populate req with relevant model information
-                            req.populate(this, asset, submodel);
-                            //                            req.Name = topic.GetElementName();
+                            req.Populate(this, asset, submodel);
 
                             var operation = submodel.Operation(topic.GetElementName());
                             req.Operation = operation;
@@ -767,7 +746,7 @@ namespace assets2036net
                             var operation = submodel.Operation(topic.GetElementName());
 
                             var respObj = Newtonsoft.Json.JsonConvert.DeserializeObject<SubmodelOperationResponse>(message);
-                            respObj.populate(this, asset, submodel);
+                            respObj.Populate(this, asset, submodel);
                             //                            respObj.Name = topic.GetElementName();
                             respObj.Operation = operation;
 
@@ -801,7 +780,7 @@ namespace assets2036net
                             else if (submodelEvent != null)
                             {
                                 SubmodelEventMessage emission = JsonConvert.DeserializeObject<SubmodelEventMessage>(message);
-                                emission.populate(this, asset, submodel);
+                                emission.Populate(this, asset, submodel);
                                 //                                emission.Name = topic.GetElementName();
 
                                 submodelEvent.EmitEmission(emission);

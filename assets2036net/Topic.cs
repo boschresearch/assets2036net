@@ -31,7 +31,7 @@ namespace assets2036net
         internal string GetFullAssetName()
         {
             var elements = Text.Split('/');
-            return CommElementBase.buildTopic(elements[0], elements[1]); 
+            return CommElementBase.BuildTopic(elements[0], elements[1]); 
         }
 
         internal string GetSubmodelName()

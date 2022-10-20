@@ -1,6 +1,6 @@
 {
   "name": "properties",
-  "rev": "0.0.1",
+  "revision": "0.0.1",
   "properties": {
     "pose": {
       "type": "string"

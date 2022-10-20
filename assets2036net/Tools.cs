@@ -140,61 +140,22 @@ namespace assets2036net
             }
         }
 
-        ///// <summary>
-        ///// Helper method to clean all! retained messages matching the given root topic 
-        ///// from the broker (e.g. [mynamespace/myAsset]. Use with care!!! All retained 
-        ///// message at the topics mynamespace/myAsset/# will be reset. 
-        ///// </summary>
-        ///// <param name="broker">hostname of the MQTT broker</param>
-        ///// <param name="port">port of the MQTT Broker. Typical: 1883</param>
-        ///// <param name="rootTopic"></param>
-        //public static void CleanAllRetainedMessages(string broker, int port, string rootTopic)
-        //{
-        //    _broker = broker;
-        //    _port = port;
-        //    _rootTopic = rootTopic;
+        public static Dictionary<string, object> BuildJsonObject(params (string, object)[] properties)
+        {
+            var result = new Dictionary<string, object>(); 
+            
+            if (properties != null)
+            {
+                foreach(var tupel in properties)
+                {
+                    result.Add(tupel.Item1, tupel.Item2); 
+                }
+            }
 
-        //    _mqttClient = new MqttClient(broker, port, false, null, null, MqttSslProtocols.None);
-        //    _mqttClient.MqttMsgPublishReceived += _mqttClient_MqttMsgPublishReceived;
+            return result; 
+        }
 
-        //    _mqttClient.Subscribe(new string[] { rootTopic+"/#" }, new byte[] { 2 });
-        //    _mqttClient.Connect(Guid.NewGuid().ToString());
-        //}
+        // private readonly static log4net.ILog log = Config.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType.FullName);
 
-
-
-        //private static void _mqttClient_MqttMsgPublishReceived(object sender, MqttMsgPublishEventArgs e)
-        //{
-        //    if (e.Retain)
-        //    {
-        //        log.Info("CLEAN: " + e.Topic);
-        //        bool sent = false; 
-        //        try
-        //        {
-        //            while (!sent)
-        //            {
-        //                _mqttClient.Publish(e.Topic, new byte[0], 2, true);
-        //                sent = true;
-        //            }
-        //        }
-        //        catch(Exception)
-        //        {
-        //            _mqttClient.Disconnect();
-
-        //            _mqttClient = new MqttClient(_broker, _port, false, null, null, MqttSslProtocols.None);
-        //            _mqttClient.MqttMsgPublishReceived += _mqttClient_MqttMsgPublishReceived;
-
-        //            _mqttClient.Subscribe(new string[] { _rootTopic+"/#" }, new byte[] { 2 });
-        //            _mqttClient.Connect(Guid.NewGuid().ToString());
-        //        }
-        //    }
-        //}
-
-        private static log4net.ILog log = Config.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType.FullName);
-
-        //private static string _broker;
-        //private static int _port;
-
-        //private static string _rootTopic;
     }
 }

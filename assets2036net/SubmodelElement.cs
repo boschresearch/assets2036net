@@ -40,7 +40,7 @@ namespace assets2036net
         {
             get
             {
-                return buildTopic(Asset.Namespace, Asset.Name, Submodel.Name, Name);
+                return BuildTopic(Asset.Namespace, Asset.Name, Submodel.Name, Name);
             }
         }
     }

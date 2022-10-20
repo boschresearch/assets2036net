@@ -57,7 +57,7 @@ namespace assets2036net
         }
 
 
-        private static log4net.ILog log = Config.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType.FullName);
+        private readonly static log4net.ILog log = Config.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType.FullName);
 
         internal SubmodelOperationRequest()
         {
@@ -69,14 +69,82 @@ namespace assets2036net
         {
             Operation = operation; 
             //Name = SubmodelElement.buildTopic(operation.Name, StringConstants.StringConstant_REQ);
-            Parameters = new Dictionary<string, object>(); 
+            Parameters = new Dictionary<string, object>();
+        }
+
+        public T ParameterValueOrDefault<T>(string parameterKey, T defaultValue = default)
+        {
+            if (!Parameters.ContainsKey(parameterKey))
+            {
+                return defaultValue; 
+            }
+
+            var value = Parameters[parameterKey]; 
+
+            try
+            {
+                var res = (T)Convert.ChangeType(value, typeof(T));
+                return res; 
+            }
+            catch (Exception)
+            {
+                return defaultValue; 
+            }
+        }
+
+        public List<string> ValidateParameters(Dictionary<string, Type> parameters)
+        {
+            List<string> result = new List<string>(); 
+
+            foreach(var kvp in parameters)
+            {
+                if (!Parameters.ContainsKey(kvp.Key))
+                {
+                    result.Add(kvp.Key);
+                    continue; 
+                }
+
+                var value = Parameters[kvp.Key]; 
+
+                try
+                {
+                    var res = Convert.ChangeType(value, kvp.Value); 
+                }
+                catch (Exception)
+                {
+                    result.Add(kvp.Key); 
+                }
+            }
+
+            return result; 
+        }
+
+
+        public bool ValidateParameter<T>(string parameterKey)
+        {
+            if (!Parameters.ContainsKey(parameterKey))
+            {
+                return false; 
+            }
+
+            var value = Parameters[parameterKey]; 
+
+            try
+            {
+                var res = Convert.ChangeType(value, typeof(T)); 
+                return true; 
+            }
+            catch (Exception)
+            {
+                return false; 
+            }
         }
 
         internal void Publish()
         {
             string message = JsonConvert.SerializeObject(this);
 
-            var topic = buildTopic(Operation.Topic, StringConstants.StringConstant_REQ); 
+            var topic = BuildTopic(Operation.Topic, StringConstants.StringConstant_REQ); 
             log.DebugFormat("Send: {0} @ {1}", message, topic);
             Asset.publish(
                 topic,

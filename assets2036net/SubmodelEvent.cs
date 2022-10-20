@@ -16,7 +16,7 @@ namespace assets2036net
     [JsonObject(MemberSerialization.OptIn)]
     public class SubmodelEvent : SubmodelElement
     {
-        private static log4net.ILog log = Config.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType.FullName);
+        private readonly static log4net.ILog log = Config.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType.FullName);
 
         internal SubmodelEvent()
         {
@@ -66,7 +66,7 @@ namespace assets2036net
         /// <summary>
         /// To be used by the submodel consumer to listen to this event. 
         /// </summary>
-        public event SubmodelEventListener Emission; 
+        public event Action<SubmodelEventMessage> Emission; 
 
         internal void EmitEmission(SubmodelEventMessage emission)
         {

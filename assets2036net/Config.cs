@@ -68,5 +68,16 @@ namespace assets2036net
 
             return result; 
         }
+
+        internal static string Assets2036SubmodelSchema
+        {
+            get
+            {
+                string schemaResourceName = "assets2036net.resources.submodel.schema"; 
+                var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(schemaResourceName);
+                var reader = new StreamReader(stream);
+                return reader.ReadToEnd(); 
+            }
+        }
     }
 }

@@ -15,7 +15,7 @@ namespace assets2036net
     /// <summary>
     /// Represents an operation in a submodel. Used for serialization to and from json and
     /// <list type="bullet">
-    ///     <item>in the submodel provider implementation you have to provide a <seealso cref="SubmodelOperationCallback"/>
+    ///     <item>in the submodel provider implementation you have to provide a callback of type Func<SubmodelOperationRequest, SubmodelOperationResponse>
     ///     for the actual implementation of the operation, </item>
     ///     <item>while on the consumer side you will use the <seealso cref="Invoke(Dictionary{string, object}, int)"/>, 
     ///     <seealso cref="StartInvoke(Dictionary{string, object}, Action{object}, Action, int)"/> or 
@@ -45,7 +45,7 @@ namespace assets2036net
                 }
             }
         }
-
+    
         /// <summary>
         /// When working with an asset proxy, use Invoke to synchronously call the operation implemented
         /// remotely. The return value is the return value of the remote call or null, if there was no return 
@@ -78,7 +78,7 @@ namespace assets2036net
                 if (Asset.Mode == Mode.Consumer)
                 {
                     SubmodelOperationRequest req = new SubmodelOperationRequest(this);
-                    req.populate(AssetMgr, Asset, Submodel);
+                    req.Populate(AssetMgr, Asset, Submodel);
 
                     var reqId = Guid.NewGuid().ToString();
                     req.RequestId = reqId.ToString();
@@ -209,13 +209,11 @@ namespace assets2036net
         /// When implementing the submodel provider, set Callback to define the method which will be called, 
         /// when somebody calls thus submodel operation remotely. 
         /// </summary>
-        public SubmodelOperationCallback Callback { get; set; }
+        public Func<SubmodelOperationRequest, SubmodelOperationResponse> Callback { get; set; }
 
+        private readonly static log4net.ILog log = Config.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType.FullName);
 
-
-        private static log4net.ILog log = Config.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType.FullName);
-
-        private Mutex _mutex = new Mutex();
+        private readonly Mutex _mutex = new Mutex();
 
         private Dictionary<string, Parameter> _parameters;
         //internal override void createSubscriptions(MqttClient mqttClient, Mode mode)
@@ -246,12 +244,12 @@ namespace assets2036net
 
             if (mode == Mode.Consumer)
             {
-                subscriptions.Add(SubmodelElement.buildTopic(Topic, StringConstants.StringConstant_RESP));
+                subscriptions.Add(SubmodelElement.BuildTopic(Topic, StringConstants.StringConstant_RESP));
                 log.InfoFormat("{0} subscribes to {1}", Name, topic);
             }
             else
             {
-                subscriptions.Add(SubmodelElement.buildTopic(Topic, StringConstants.StringConstant_REQ)); 
+                subscriptions.Add(SubmodelElement.BuildTopic(Topic, StringConstants.StringConstant_REQ)); 
                 log.InfoFormat("{0} subscribes to {1}", Name, topic);
             }
 

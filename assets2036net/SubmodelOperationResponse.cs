@@ -34,7 +34,17 @@ namespace assets2036net
         {
         }
 
-        private static log4net.ILog log = Config.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType.FullName);
+        /// <summary>
+        /// Convenience method to add named parameters to an object type return parameter. Internally a dictionary is created which lateron is serilized to JSON.
+        /// </summary>
+        public SubmodelOperationResponse WithObjectValue(params (string, object)[] properties)
+        {
+            this.Value = Tools.BuildJsonObject(properties); 
+
+            return this; 
+        }
+
+        private readonly static log4net.ILog log = Config.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType.FullName);
 
         internal SubmodelOperation Operation { get; set; }
 
@@ -43,7 +53,7 @@ namespace assets2036net
             string message = JsonConvert.SerializeObject(this); 
             log.Debug("Send: " + message); 
             Asset.publish(
-                buildTopic(this.Operation.Topic, StringConstants.StringConstant_RESP),
+                BuildTopic(this.Operation.Topic, StringConstants.StringConstant_RESP),
                 message, 
                 false);
         }

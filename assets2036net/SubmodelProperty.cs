@@ -39,6 +39,7 @@ namespace assets2036net
         /// the value on the remote asset changes. 
         /// <seealso cref="HandleValueModified"/>
         /// </summary>
+        //public event HandleValueModified ValueModified;
         public event HandleValueModified ValueModified;
 
         /// <summary>

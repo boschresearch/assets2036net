@@ -21,9 +21,6 @@ namespace assets2036net
             Name = StringConstants.SubmodelNameEnpoint; 
         }
 
-        public delegate void ShutdownTriggeredHandler();
-
-        public delegate void RestartTriggeredHandler();
 
         public bool Online { get; set; }
         public bool Healthy {
@@ -37,8 +34,8 @@ namespace assets2036net
             }
         }
 
-        public event ShutdownTriggeredHandler ShutdownTriggered;
-        public event RestartTriggeredHandler RestartTriggered;
+        public event Action ShutdownTriggered;
+        public event Action RestartTriggered;
 
         internal void Shutdown()
         {

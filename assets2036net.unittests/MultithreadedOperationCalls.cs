@@ -44,7 +44,7 @@ namespace assets2036net.unittests
             //Asset assetConsumer2 = mgrConsumer.CreateAsset("ConcurrentCustomers", Mode.Consumer, uri);
             //Asset assetConsumer3 = mgrConsumer.CreateAsset("ConcurrentCustomers", Mode.Consumer, uri);
 
-            int numberCalls = 100;
+            int numberCalls = 20;
 
             var t1 = new Thread(() =>
             {

@@ -45,7 +45,7 @@ namespace assets2036net
                 }
             }
         }
-    
+
         /// <summary>
         /// When working with an asset proxy, use Invoke to synchronously call the operation implemented
         /// remotely. The return value is the return value of the remote call or null, if there was no return 
@@ -133,14 +133,16 @@ namespace assets2036net
         /// timespan, TimeoutException is thrown</param>
         /// <returns>The task object representing the remote call, which will give you the return value
         /// if available</returns>
-        public Task<object> StartInvoke(
+        public async Task<object> InvokeAsync(
             Dictionary<string, object> parameters,
             TimeSpan timeout)
         {
-            return Task.Run(() =>
+            var t = Task.Run(() =>
             {
                 return Invoke(parameters, timeout);
             });
+
+            return await t;
         }
 
         /// <summary>
@@ -167,12 +169,18 @@ namespace assets2036net
                 try
                 {
                     object result = Invoke(parameters, timeout);
-                    log.Debug("InvokeAndForget succeeded.");
+                    log.Debug("StartInvoke succeeded.");
 
                     if (inCaseOfSuccess != null)
                     {
-                        log.Debug("InvokeAndForget calls action inCaseOfSuccess...");
-                        inCaseOfSuccess.Invoke(result);
+                        try
+                        {
+                            inCaseOfSuccess.Invoke(result);
+                        }
+                        catch (System.Exception ex)
+                        {
+                            log.Error($"action inCaseOfSuccess threw exception: {ex}"); 
+                        }
                     }
                 }
                 catch (Exception e)
@@ -180,8 +188,14 @@ namespace assets2036net
                     log.Error(e);
                     if (inCaseOfFailure != null)
                     {
-                        log.Debug("InvokeAndForget calls action inCaseOfFailure...");
-                        inCaseOfFailure.Invoke();
+                        try
+                        {
+                            inCaseOfFailure.Invoke();
+                        }
+                        catch (Exception ex)
+                        {
+                            log.Error($"action inCaseOfFailure threw exception: {ex}"); 
+                        }
                     }
                 }
             });
@@ -240,7 +254,7 @@ namespace assets2036net
         {
             var subscriptions = new HashSet<string>();
 
-            var topic = ""; 
+            var topic = "";
 
             if (mode == Mode.Consumer)
             {
@@ -249,11 +263,11 @@ namespace assets2036net
             }
             else
             {
-                subscriptions.Add(SubmodelElement.BuildTopic(Topic, StringConstants.StringConstant_REQ)); 
+                subscriptions.Add(SubmodelElement.BuildTopic(Topic, StringConstants.StringConstant_REQ));
                 log.InfoFormat("{0} subscribes to {1}", Name, topic);
             }
 
-            return subscriptions; 
+            return subscriptions;
         }
     }
 }

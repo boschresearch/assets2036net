@@ -17,7 +17,7 @@ namespace assets2036net.unittests
         public static int BrokerPort = 1883;
         public static string EndpointName = "assets2036net_tests"; 
 
-        public static TimeSpan WaitTime = TimeSpan.FromSeconds(50);
+        public static TimeSpan WaitTime = TimeSpan.FromSeconds(500);
         public static string RootTopic = "arena2036test";
 
         public static Uri GetUriToEndpointSubmodel()

@@ -155,8 +155,10 @@ namespace assets2036net
                     }
                     else
                     {
-                        hs = new HashSet<string>();
-                        hs.Add(topic.GetAssetName());
+                        hs = new HashSet<string>
+                        {
+                            topic.GetAssetName()
+                        };
                         foundAssets.Add(topic.GetRootTopicName(), hs);
                     }
 

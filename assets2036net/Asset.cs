@@ -26,9 +26,6 @@ namespace assets2036net
     {
         private readonly static log4net.ILog log = Config.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType.FullName);
 
-        //public delegate void HandleConnectivityLost(Asset asset);
-        //public event HandleConnectivityLost ConnectivityLost;
-
         /// <summary>
         /// this' asset's namespace. Set during creation. First part of asset's mqtt messages' topic. 
         /// </summary>

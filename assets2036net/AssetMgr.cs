@@ -34,8 +34,6 @@ namespace assets2036net
     /// </summary>
     public partial class AssetMgr : IMqttClientDisconnectedHandler, IMqttApplicationMessageReceivedHandler
     {
-        public delegate bool HealthyCheck();
-
         /// <summary>
         /// Event is emitted, when connection to MQTT broker is lost
         /// </summary>
@@ -107,11 +105,11 @@ namespace assets2036net
         public AssetEndpoint EndpointAsset { get; private set; }
 
         /// <summary>
-        /// Define a callback which will be called periodically to check the healthy status of 
+        /// Set a callback which will be called periodically to check the healthy status of 
         /// an endpoint associated by this asset manager. 
         /// </summary>
         /// <param name="callback">delegate to check the healthiness status of this asset</param>
-        public void SetHealthyCheck(HealthyCheck callback)
+        public void SetHealthyCheck(Func<bool> callback)
         {
             _healthyCallback = callback;
         }
@@ -225,67 +223,7 @@ namespace assets2036net
             return valid;
         }
 
-        private HealthyCheck _healthyCallback;
-
-        // readonly Task _taskHealthyCheck = null;
-
-        // private void _healthyCheck()
-        // {
-        //     var endpointConsumer = this.CreateAssetProxy(Namespace, EndpointAsset.Name, new Uri(Config.EndpointSubmodelDescriptionUrl));
-
-        //     while (_healthyCheckActive)
-        //     {
-        //         Thread.Sleep(5000);
-        //         try
-        //         {
-        //             log.DebugFormat("Enpoint %1: Try to ping myself via mqtt...", endpointConsumer.Name);
-
-        //             try
-        //             {
-        //                 endpointConsumer.Submodel(StringConstants.SubmodelNameEnpoint).Operation(StringConstants.OperationNamePing).Invoke(new Dictionary<string, object>(), TimeSpan.FromSeconds(5));
-        //             }
-        //             catch (TimeoutException te)
-        //             {
-        //                 log.Error(te);
-        //                 log.Error("Probably Lost subscriptions at MQTT broker.");
-
-        //                 try
-        //                 {
-        //                     LostConnection?.Invoke();
-        //                 }
-        //                 catch (Exception e)
-        //                 {
-        //                     log.Error(e);
-        //                 }
-
-        //                 if (AutomaticReconnectOnConnectionLost)
-        //                 {
-        //                     // try to connect again... s
-        //                     log.Info("Try reconnect to mqtt broker with existing client id...");
-        //                     Connect();
-        //                 }
-        //                 else
-        //                 {
-
-        //                 }
-        //             }
-
-        //             bool healthy = true;
-        //             if (_healthyCallback != null)
-        //             {
-        //                 healthy = _healthyCallback();
-        //             }
-
-        //             EndpointAsset.SubmodelEndpoint.Property("healthy").Value = healthy;
-        //             EndpointAsset.SubmodelEndpoint.Property(StringConstants.PropertyNameOnline).Value = true;
-        //         }
-        //         catch (Exception e)
-        //         {
-        //             log.Error(e);
-        //             EndpointAsset.SubmodelEndpoint.Property("healthy").Value = false;
-        //         }
-        //     }
-        // }
+        private Func<bool> _healthyCallback;
 
         private List<Submodel> _parseSubmodels(params Uri[] submodelUrls)
         {

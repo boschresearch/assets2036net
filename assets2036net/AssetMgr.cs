@@ -375,7 +375,7 @@ namespace assets2036net
             {
                 case ("file"):
                     {
-                        text = File.ReadAllText(locator.LocalPath);
+                        text = File.ReadAllText(locator.AbsolutePath);
                         break;
                     }
                 case ("http"):

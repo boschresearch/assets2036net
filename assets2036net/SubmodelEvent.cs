@@ -3,7 +3,6 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-using MQTTnet.Client;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;

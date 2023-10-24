@@ -104,15 +104,68 @@ namespace assets2036net
         /// </summary>
         public AssetEndpoint EndpointAsset { get; private set; }
 
+        
+        private CancellationTokenSource _healthyCallbackTaskCTS = null; 
+        private Task _healthyCallbackTask = null; 
+
         /// <summary>
         /// Set a callback which will be called periodically to check the healthy status of 
         /// an endpoint associated by this asset manager. 
         /// </summary>
         /// <param name="callback">delegate to check the healthiness status of this asset</param>
-        public void SetHealthyCheck(Func<bool> callback)
+        public Func<bool> HealthyCallback
         {
-            _healthyCallback = callback;
+            get => _healthyCallback; 
+            set
+            {
+                _healthyCallback = value; 
+                if (value == null)
+                {
+                    _stopHealthyCallbackTask(); 
+                    return; 
+                }
+                else
+                {
+                    _stopHealthyCallbackTask(); 
+                    _healthyCallbackTask = Task.Run(() => 
+                    {
+                        SubmodelProperty healthyProperty = EndpointAsset.Submodel(StringConstants.SubmodelNameEnpoint).Property(StringConstants.PropertyNameHealthy); 
+                        while (!_healthyCallbackTaskCTS.Token.IsCancellationRequested)
+                        {
+                            try
+                            {
+                                bool result = _healthyCallback.Invoke(); 
+                                log.Debug($"healthyCallback returned {result}"); 
+                                healthyProperty.Value = result; 
+                            }
+                            catch (Exception e)
+                            {
+                                log.Error($"an error occured during the healthy callback: \n{e}"); 
+                                healthyProperty.Value = false; 
+                            }
+
+                            Thread.Sleep(TimeSpan.FromMilliseconds(2000)); 
+                        }
+                    }, 
+                    _healthyCallbackTaskCTS.Token); 
+                }
+            }
         }
+
+        private void _stopHealthyCallbackTask()
+        {
+            if (_healthyCallbackTask != null)
+            {
+                _healthyCallbackTaskCTS.Cancel(); 
+                _healthyCallbackTask.Wait(); 
+                _healthyCallbackTask = null; 
+            }
+        }
+
+        // public void SetHealthyCheck(Func<bool> callback)
+        // {
+        //     _healthyCallback = callback;
+        // }
 
         /// <summary>
         /// Creates and returns an (owned) asset. The newly created asset is managed by this assetMgr. You
@@ -428,71 +481,56 @@ namespace assets2036net
         /**
          * Waits until all published messages are delivered to subscribers, at least timeoutSeconds seconds
          */
-        public bool Wait(int timeoutSeconds = 3)
+        // public bool Wait(int timeoutSeconds = 3)
+        // {
+        //     // wait for unpublished messages to be sent
+        //     DateTime started = DateTime.Now;
+
+        //     var count = 1;
+
+        //     Func<int> numberUnpublishedMessages = () => 
+        //     {
+        //         lock (unpublishedMessagedLock)
+        //         {
+        //             return unpublishedMessages.Count;
+        //         }
+        //     }; 
+            
+        //     while (numberUnpublishedMessages() > 0 && DateTime.Now.Subtract(started) < TimeSpan.FromSeconds(timeoutSeconds))
+        //     {
+        //         Thread.Sleep(100);
+        //     }
+
+        //     return count == 0;
+        // }
+
+        /// <summary>
+        /// Stops all started tasks and disconnects from the mqtt broker. 
+        /// </summary>
+        public void Dispose()
         {
-            // wait for unpublished messages to be sent
-            DateTime started = DateTime.Now;
-
-            var count = 1;
-
-            lock (unpublishedMessagedLock)
-            {
-                count = unpublishedMessages.Count;
-            }
-
-            while (count > 0 && DateTime.Now.Subtract(started) < TimeSpan.FromSeconds(timeoutSeconds))
-            {
-                Thread.Sleep(100);
-
-                lock (unpublishedMessagedLock)
-                {
-                    count = unpublishedMessages.Count;
-                }
-            }
-
-            return count == 0;
+           // Dispose of unmanaged resources.
+           Dispose(true);
+           // Suppress finalization.
+           GC.SuppressFinalize(this);
         }
 
-        ///// <summary>
-        ///// Stops all started tasks and disconnects from the mqtt broker. 
-        ///// </summary>
-        //public void Dispose()
-        //{
-        //    // Dispose of unmanaged resources.
-        //    Dispose(true);
-        //    // Suppress finalization.
-        //    GC.SuppressFinalize(this);
-        //}
+        bool _disposed = false;
 
-        //bool _disposed = false;
+        protected virtual void Dispose(bool disposing)
+        {
+           if (_disposed)
+               return;
 
-        //protected virtual void Dispose(bool disposing)
-        //{
-        //    if (_disposed)
-        //        return;
+           if (disposing)
+           {
+                _stopHealthyCallbackTask(); 
 
-        //    if (disposing)
-        //    {
-        //        if (_taskHealthyCheck != null && _taskHealthyCheck.Status == TaskStatus.Running)
-        //        {
-        //            _healthyCheckActive = false;
-        //            _taskHealthyCheck.Wait();
-        //        }
+            //    Wait(1);
+           }
 
-        //        Wait(1);
-
-        //        try
-        //        {
-        //            _mqttClient.Disconnect();
-        //        }
-        //        catch
-        //        {
-        //        }
-
-        //    }
-
-        //    _disposed = true;
-        //}
+           _disposed = true;
+        }
 
         internal IMqttClient _mqttClient;
 

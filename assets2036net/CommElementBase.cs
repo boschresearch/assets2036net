@@ -3,11 +3,6 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Text;
-
 namespace assets2036net
 {
     /// <summary>

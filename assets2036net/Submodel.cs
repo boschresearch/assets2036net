@@ -29,7 +29,7 @@ namespace assets2036net
         /// <summary>
         /// The submodel's revision number
         /// </summary>
-        [JsonPropertyName("rev")]
+        [JsonPropertyName("revision")]
         public string Revision
         {
             get; set;

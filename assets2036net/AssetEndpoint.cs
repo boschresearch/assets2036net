@@ -75,6 +75,7 @@ namespace assets2036net
             }
             set
             {
+                this._asset.AssetMgr.HealthyCallback = null; 
                 _asset.Submodel(StringConstants.SubmodelNameEnpoint).Property(StringConstants.PropertyNameHealthy).Value = value;
             }
         }

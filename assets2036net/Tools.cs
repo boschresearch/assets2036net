@@ -84,6 +84,8 @@ namespace assets2036net
                         .WithPayload(new byte[] { })
                         .WithRetainFlag(); 
 
+                    Console.WriteLine(t); 
+
                     tasks.Add(mqttClient.PublishAsync(mb.Build(), CancellationToken.None));
                 }
 

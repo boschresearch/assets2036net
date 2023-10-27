@@ -53,7 +53,7 @@ namespace assets2036net
         /// <param name="parameters">The parameters for the remote call</param>
         /// timespan, TimeoutException is thrown</param>
         /// <returns>the return value of the asset submodel operation, if there is one, else null.</returns>
-        public object Invoke(Dictionary<string, object> parameters)
+        public SubmodelOperationResponse Invoke(Dictionary<string, object> parameters)
         {
             return Invoke(parameters, TimeSpan.FromSeconds(5));
         }
@@ -68,7 +68,7 @@ namespace assets2036net
         /// <param name="timeoutMs">A timeout in ms. If the remote asset doesn't answer within this 
         /// timespan, TimeoutException is thrown</param>
         /// <returns>the return value of the asset submodel operation, if there is one, else null.</returns>
-        public object Invoke(Dictionary<string, object> parameters, TimeSpan timeout)
+        public SubmodelOperationResponse Invoke(Dictionary<string, object> parameters, TimeSpan timeout)
         {
             try
             {
@@ -99,7 +99,7 @@ namespace assets2036net
                         if (resp != null)
                         {
                             log.DebugFormat("{0}.{1} received response {2} on request {3}", Asset.Name, Name, resp.Value, resp.RequestId);
-                            return resp.Value;
+                            return resp; 
                         }
 
                         timeGone = DateTime.Now - started;
@@ -132,7 +132,7 @@ namespace assets2036net
         /// timespan, TimeoutException is thrown</param>
         /// <returns>The task object representing the remote call, which will give you the return value
         /// if available</returns>
-        public async Task<object> InvokeAsync(
+        public async Task<SubmodelOperationResponse> InvokeAsync(
             Dictionary<string, object> parameters,
             TimeSpan timeout)
         {
@@ -159,7 +159,7 @@ namespace assets2036net
         /// if available</returns>
         public Task StartInvoke(
             Dictionary<string, object> parameters,
-            Action<object> inCaseOfSuccess,
+            Action<SubmodelOperationResponse> inCaseOfSuccess,
             Action inCaseOfFailure,
             TimeSpan timeout)
         {
@@ -167,7 +167,7 @@ namespace assets2036net
             {
                 try
                 {
-                    object result = Invoke(parameters, timeout);
+                    var result = Invoke(parameters, timeout);
                     log.Debug("StartInvoke succeeded.");
 
                     if (inCaseOfSuccess != null)

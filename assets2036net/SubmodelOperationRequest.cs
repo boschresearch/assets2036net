@@ -5,6 +5,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -73,18 +74,132 @@ namespace assets2036net
             Parameters = new Dictionary<string, object>();
         }
 
-        public T ParameterValueOrDefault<T>(string parameterKey, T defaultValue = default)
+        public T GetParameterAs<T>(string paramName) where T : class
+        {
+            if (!Parameters.ContainsKey(paramName))
+            {
+                log.Warn($"paramater named {paramName} not found - returning null value"); 
+                return null; 
+            }
+
+            try
+            {
+                return ((JsonElement)Parameters[paramName]).Deserialize<T>(); 
+            }
+            catch
+            {
+                log.Warn($"deserialization of paramater named {paramName} failed - returning null value"); 
+                return null; 
+            }
+        }
+
+        public int GetParameterInt32(string paramName) 
+        {
+            if (!Parameters.ContainsKey(paramName))
+            {
+                log.Warn($"paramater named {paramName} not found - returning default value"); 
+                return 0; 
+            }
+
+            try
+            {
+                return ((JsonElement)Parameters[paramName]).GetInt32(); 
+            }
+            catch
+            {
+                log.Warn($"deserialization of paramater named {paramName} failed - returning default value"); 
+                return 0; 
+            }
+        }
+
+        public long GetParameterInt64(string paramName) 
+        {
+            if (!Parameters.ContainsKey(paramName))
+            {
+                log.Warn($"paramater named {paramName} not found - returning default value"); 
+                return (Int64)0; 
+            }
+
+            try
+            {
+                return ((JsonElement)Parameters[paramName]).GetInt64(); 
+            }
+            catch
+            {
+                log.Warn($"deserialization of paramater named {paramName} failed - returning default value"); 
+                return (long)0; 
+            }
+        }
+
+        public double GetParameterDouble(string paramName) 
+        {
+            if (!Parameters.ContainsKey(paramName))
+            {
+                log.Warn($"paramater named {paramName} not found - returning default value"); 
+                return (double)0.0; 
+            }
+
+            try
+            {
+                return ((JsonElement)Parameters[paramName]).GetDouble(); 
+            }
+            catch
+            {
+                log.Warn($"deserialization of paramater named {paramName} failed - returning default value"); 
+                return (double)0.0; 
+            }
+        }
+
+        public float GetParameterFloat(string paramName) 
+        {
+            if (!Parameters.ContainsKey(paramName))
+            {
+                log.Warn($"paramater named {paramName} not found - returning null value"); 
+                return 0.0f; 
+            }
+
+            try
+            {
+                return (float)((JsonElement)Parameters[paramName]).GetDouble(); 
+            }
+            catch
+            {
+                log.Warn($"deserialization of paramater named {paramName} failed - returning default value"); 
+                return 0.0f; 
+            }
+        }
+
+        public bool GetParameterBool(string paramName) 
+        {
+            if (!Parameters.ContainsKey(paramName))
+            {
+                log.Warn($"paramater named {paramName} not found - returning default value"); 
+                return false; 
+            }
+
+            try
+            {
+                return ((JsonElement)Parameters[paramName]).GetBoolean(); 
+            }
+            catch
+            {
+                log.Warn($"deserialization of paramater named {paramName} failed - returning default value"); 
+                return false; 
+            }
+        }
+
+        public T GetParameterValueOrDefault<T>(string parameterKey, T defaultValue = default)
         {
             if (!Parameters.ContainsKey(parameterKey))
             {
                 return defaultValue; 
             }
 
-            var value = Parameters[parameterKey]; 
+            var value = (JsonElement)Parameters[parameterKey]; 
 
             try
             {
-                var res = (T)Convert.ChangeType(value, typeof(T));
+                var res = value.Deserialize<T>(); 
                 return res; 
             }
             catch (Exception)
@@ -93,53 +208,53 @@ namespace assets2036net
             }
         }
 
-        public List<string> ValidateParameters(Dictionary<string, Type> parameters)
-        {
-            List<string> result = new List<string>(); 
+        // public List<string> ValidateParameters(Dictionary<string, Type> parameters)
+        // {
+        //     List<string> result = new List<string>(); 
 
-            foreach(var kvp in parameters)
-            {
-                if (!Parameters.ContainsKey(kvp.Key))
-                {
-                    result.Add(kvp.Key);
-                    continue; 
-                }
+        //     foreach(var kvp in parameters)
+        //     {
+        //         if (!Parameters.ContainsKey(kvp.Key))
+        //         {
+        //             result.Add(kvp.Key);
+        //             continue; 
+        //         }
 
-                var value = Parameters[kvp.Key]; 
+        //         var value = Parameters[kvp.Key]; 
 
-                try
-                {
-                    var res = Convert.ChangeType(value, kvp.Value); 
-                }
-                catch (Exception)
-                {
-                    result.Add(kvp.Key); 
-                }
-            }
+        //         try
+        //         {
+        //             var res = Convert.ChangeType(value, kvp.Value); 
+        //         }
+        //         catch (Exception)
+        //         {
+        //             result.Add(kvp.Key); 
+        //         }
+        //     }
 
-            return result; 
-        }
+        //     return result; 
+        // }
 
 
-        public bool ValidateParameter<T>(string parameterKey)
-        {
-            if (!Parameters.ContainsKey(parameterKey))
-            {
-                return false; 
-            }
+        // public bool ValidateParameter<T>(string parameterKey)
+        // {
+        //     if (!Parameters.ContainsKey(parameterKey))
+        //     {
+        //         return false; 
+        //     }
 
-            var value = Parameters[parameterKey]; 
+        //     var value = Parameters[parameterKey]; 
 
-            try
-            {
-                var res = Convert.ChangeType(value, typeof(T)); 
-                return true; 
-            }
-            catch (Exception)
-            {
-                return false; 
-            }
-        }
+        //     try
+        //     {
+        //         var res = Convert.ChangeType(value, typeof(T)); 
+        //         return true; 
+        //     }
+        //     catch (Exception)
+        //     {
+        //         return false; 
+        //     }
+        // }
 
         internal void Publish()
         {

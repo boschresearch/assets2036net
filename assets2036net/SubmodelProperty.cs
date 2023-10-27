@@ -67,7 +67,7 @@ namespace assets2036net
         /// When implementing an asset consumer, use Value to grab the current value or alternatively 
         /// subscribe to the event <seealso cref="HandleValueModified"/> and get informed, if the 
         /// remote value changes. 
-        /// Because the value is encapsulated in a Newtonsoft JToken, you have to transform it into 
+        /// Because the value is encapsulated in a System.Text.Json.JsonElement, you have to transform it into 
         /// the native C#-type you expect. You can use the methods 
         /// <list type="bullet">
         /// <item><seealso cref="ValueBool"/></item>
@@ -77,12 +77,17 @@ namespace assets2036net
         /// <item><seealso cref="ValueString"/></item>
         /// </list>
         /// </summary>
-        /// If you expect some special object or array type, use <seealso cref="GetValueAs{T}"/>. 
+        /// If you expect some special object or array type, use <seealso cref="ValueAs{T}"/>. 
         [JsonIgnore]
         public object Value
         {
             get
             {
+                if (Asset.Mode != Mode.Consumer)
+                {
+                    throw new Exception("You cannot read property values on an asset owner"); 
+                }
+
                 return _value;
             }
             set
@@ -137,10 +142,6 @@ namespace assets2036net
                 {
                     return null; 
                 }
-                else if (Value.GetType() == typeof(string))
-                {
-                    return (string)Value; 
-                }
                 else
                 {
                     return ((JsonElement)Value).GetString(); 
@@ -158,10 +159,6 @@ namespace assets2036net
                 if (Value == null)
                 {
                     return (int)0; 
-                }
-                else if (Value.GetType() == typeof(int))
-                {
-                    return (int)Value; 
                 }
                 else
                 {
@@ -181,10 +178,6 @@ namespace assets2036net
                 {
                     return 0.0f; 
                 }
-                else if (Value.GetType() == typeof(double))
-                {
-                    return (double)Value; 
-                }
                 else
                 {
                     return (double)((JsonElement)Value).GetDouble(); 
@@ -202,10 +195,6 @@ namespace assets2036net
                 if (Value == null)
                 {
                     return 0.0f; 
-                }
-                else if (Value.GetType() == typeof(float))
-                {
-                    return (float)Value; 
                 }
                 else
                 {
@@ -226,10 +215,6 @@ namespace assets2036net
                 {
                     return false; 
                 }
-                else if (Value.GetType() == typeof(bool))
-                {
-                    return (bool)Value; 
-                }
                 else 
                 {
                     return ((JsonElement)Value).GetBoolean(); 
@@ -241,9 +226,11 @@ namespace assets2036net
         /// returns the current property value as generic type T. 
         /// implemented: JsonSerializer.Deserialize<T>(JsonSerializer.ValueObject.ToString()); 
         /// </summary>
-        public T GetValueAs<T>() where T : new()
+        public T ValueAs<T>() where T : new()
         {
-            return JsonSerializer.Deserialize<T>(JsonSerializer.Serialize(Value)); 
+            return ((JsonElement)Value).Deserialize<T>(
+                Tools.JsonSerializerOptions
+            ); 
         }
 
         /// <summary>

@@ -8,8 +8,6 @@ using MQTTnet.Client;
 using MQTTnet.Client.Disconnecting;
 using MQTTnet.Client.Options;
 using MQTTnet.Client.Receiving;
-// using Newtonsoft.Json;
-// using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -82,6 +80,10 @@ namespace assets2036net
             _mapReqIdResponse = new ConcurrentDictionary<string, SubmodelOperationResponse>();
 
             Connect();
+
+            var ep = _createOwnedAsset(@namespace, _endpointName, new Uri(Config.EndpointSubmodelDescriptionUrl));
+            EndpointAsset = new AssetEndpoint(ep);
+            EndpointAsset.Submodel(StringConstants.SubmodelNameEnpoint).Property(StringConstants.PropertyNameOnline).Value = true;
         }
 
         /// <summary>
@@ -110,8 +112,8 @@ namespace assets2036net
         
         private CancellationTokenSource _healthyCallbackTaskCTS = null; 
         private Task _healthyCallbackTask = null; 
-
         private string _mqttKnownSessionId = ""; 
+        public TimeSpan HealthyCallbackRefreshRate {get;set;} = TimeSpan.FromSeconds(2); 
 
         /// <summary>
         /// Set a callback which will be called periodically to check the healthy status of 
@@ -124,17 +126,18 @@ namespace assets2036net
             set
             {
                 _healthyCallback = value; 
+                var healthyProperty = EndpointAsset.Submodel(StringConstants.SubmodelNameEnpoint).Property(StringConstants.PropertyNameHealthy); 
                 if (value == null)
                 {
                     _stopHealthyCallbackTask(); 
-                    return; 
+                    healthyProperty.Value = false; 
                 }
                 else
                 {
                     _stopHealthyCallbackTask(); 
+                    _healthyCallbackTaskCTS = new CancellationTokenSource(); 
                     _healthyCallbackTask = Task.Run(() => 
                     {
-                        SubmodelProperty healthyProperty = EndpointAsset.Submodel(StringConstants.SubmodelNameEnpoint).Property(StringConstants.PropertyNameHealthy); 
                         while (!_healthyCallbackTaskCTS.Token.IsCancellationRequested)
                         {
                             try
@@ -149,7 +152,7 @@ namespace assets2036net
                                 healthyProperty.Value = false; 
                             }
 
-                            Thread.Sleep(TimeSpan.FromMilliseconds(2000)); 
+                            Thread.Sleep(HealthyCallbackRefreshRate); 
                         }
                     }, 
                     _healthyCallbackTaskCTS.Token); 
@@ -198,13 +201,6 @@ namespace assets2036net
         /// <returns>the newly created asset</returns>
         public Asset CreateAsset(string @namespace, string assetName, params Uri[] submodels)
         {
-            if (EndpointAsset == null)
-            {
-                var ep = _createOwnedAsset(@namespace, _endpointName, new Uri(Config.EndpointSubmodelDescriptionUrl));
-                EndpointAsset = new AssetEndpoint(ep);
-                EndpointAsset.Submodel(StringConstants.SubmodelNameEnpoint).Property(StringConstants.PropertyNameOnline).Value = true;
-            }
-
             var asset = _createOwnedAsset(@namespace, assetName, submodels);
             return asset;
         }
@@ -308,13 +304,7 @@ namespace assets2036net
                             {
                                 Converters = { new JsonStringEnumConverter() }
                             });
-                // submodel._schema = submodel; 
 
-                // // Newtonsoft impl: 
-                // var jobjectSubmodel = JObject.Parse(submodelDefinition);
-                // var submodel = jobjectSubmodel.ToObject<Submodel>();
-
-                // submodel._schema = jobjectSubmodel;
                 submodel.SubmodelUrl = submodelUri.ToString();
 
                 submodels.Add(submodel);
@@ -327,6 +317,21 @@ namespace assets2036net
         {
             var proxy = _createBaseAsset(@namespace, assetName, submodels);
             proxy.Mode = Mode.Consumer;
+
+            // add meta property to each submodel: 
+            foreach(var submodel in submodels)
+            {
+                submodel.Properties.Add(
+                    StringConstants.PropertyNameMeta, 
+                    new SubmodelProperty
+                    {
+                        Name = StringConstants.PropertyNameMeta, 
+                        Asset = submodel.Asset, 
+                        AssetMgr = submodel.AssetMgr, 
+                        Submodel = submodel
+                    }
+                ); 
+            }
 
             if (!_consumerAssets.TryGetValue(proxy.FullName, out ConcurrentBag<Asset> bag))
             {
@@ -381,7 +386,7 @@ namespace assets2036net
 
                 var metaValue = new MetaPropertyValue
                 {
-                    Source = _endpointName,
+                    Source = Topic.From(Namespace, this._endpointName), 
                     SubmodelDefinition = submodel,
                     Url = submodel.SubmodelUrl
                 }; 
@@ -549,8 +554,6 @@ namespace assets2036net
            if (disposing)
            {
                 _stopHealthyCallbackTask(); 
-
-            //    Wait(1);
            }
 
            _disposed = true;
@@ -788,7 +791,6 @@ namespace assets2036net
 
                             if (property != null)
                             {
-                                // object messageObj = Newtonsoft.Json.JsonConvert.DeserializeObject(message);
                                 object messageObj = JsonSerializer.Deserialize<object>(message); 
                                 property.updateLocalValue(messageObj);
                             }
@@ -797,7 +799,6 @@ namespace assets2036net
                                 // SubmodelEventMessage emission = JsonConvert.DeserializeObject<SubmodelEventMessage>(message);
                                 var emission = JsonSerializer.Deserialize<SubmodelEventMessage>(message); 
                                 emission.Populate(this, asset, submodel);
-                                //                                emission.Name = topic.GetElementName();
 
                                 submodelEvent.EmitEmission(emission);
                             }

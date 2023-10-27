@@ -3,6 +3,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
+using System;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -54,6 +55,25 @@ namespace assets2036net
                 BuildTopic(this.Operation.Topic, StringConstants.StringConstant_RESP),
                 message, 
                 false);
+        }
+
+        public T GetReturnValueOrDefault<T>(T defVal = default)
+        {
+            if (Value == null)
+            {
+                return default; 
+            }
+
+            try
+            {
+                return ((JsonElement)this.Value).Deserialize<T>(); 
+            }
+            catch (Exception e)
+            {
+                log.Error($"error during deserialization of return value to type {typeof(T)}: {e}"); 
+                return default; 
+            }
+            
         }
     }
 }

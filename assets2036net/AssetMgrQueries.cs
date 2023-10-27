@@ -76,7 +76,7 @@ namespace assets2036net
                     var topic = eventArgs.ApplicationMessage.Topic;
 
                     string message = System.Text.Encoding.UTF8.GetString(eventArgs.ApplicationMessage.Payload);
-                    // var metaTag = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, object>>(message);
+
                     var metaTag = System.Text.Json.JsonSerializer.Deserialize<MetaPropertyValue>(
                         message, 
                         Tools.JsonSerializerOptions);
@@ -97,8 +97,7 @@ namespace assets2036net
                         var stringSchema = JsonSerializer.Serialize(
                             metaTag.SubmodelDefinition, 
                             Tools.JsonSerializerOptions);
-                        // var schema = Newtonsoft.Json.JsonConvert.DeserializeObject<Submodel>(stringSchema);
-                        // schema.SubmodelUrl = metaTag["submodel_url"] as string;
+
                         submodels.Add(metaTag.SubmodelDefinition.Name, metaTag.SubmodelDefinition);
                     }
                     catch (Exception exc)

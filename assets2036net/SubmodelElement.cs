@@ -3,10 +3,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-using MQTTnet.Client;
-// using Newtonsoft.Json;
 using System.Collections.Generic;
-using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace assets2036net
@@ -35,6 +32,7 @@ namespace assets2036net
 
         //internal abstract void createSubscriptions(IMqttClient mqttClient, Mode mode);
 
+        private string _topic = null; 
         /// <summary>
         /// Topic of the submodel element. Used internally for MQTT communication. 
         /// </summary>
@@ -43,7 +41,12 @@ namespace assets2036net
         {
             get
             {
-                return BuildTopic(Asset.Namespace, Asset.Name, Submodel.Name, Name);
+                if (_topic == null)
+                {
+                    _topic = BuildTopic(Asset.Namespace, Asset.Name, Submodel.Name, Name);
+                }
+
+                return _topic; 
             }
         }
     }

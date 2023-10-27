@@ -3,16 +3,31 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
+using System.Linq;
+
 namespace assets2036net
 {
-    internal class Topic
+    public class Topic
     {
-        internal Topic(string text)
+        public Topic(string text)
         {
             Text = text; 
         }
 
-        internal string Text { get; set; }
+        public static implicit operator string(Topic t)
+        {
+            return t.ToString(); 
+        }
+
+        public static Topic From(params string[] topicElements)
+        {
+            return new Topic(string.Join("/", topicElements)); 
+        }
+
+        public string Text { 
+            get; 
+            internal set; 
+        }
 
         internal string GetRootTopicName()
         {

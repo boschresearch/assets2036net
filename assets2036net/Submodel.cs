@@ -65,7 +65,7 @@ namespace assets2036net
                 if (p == null)
                     return null;
 
-                var mpv = p.GetValueAs<MetaPropertyValue>();
+                var mpv = p.ValueAs<MetaPropertyValue>();
                 return mpv; 
             }
         }
@@ -76,6 +76,7 @@ namespace assets2036net
             _properties = new Dictionary<string, SubmodelProperty>();
             _operations = new Dictionary<string, SubmodelOperation>();
             _events = new Dictionary<string, SubmodelEvent>();
+
         }
 
         // JObject repr. of the schema

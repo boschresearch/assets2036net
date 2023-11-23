@@ -22,7 +22,7 @@ namespace assets2036net
         public DateTime Timestamp { get; internal set; }
 
         [JsonPropertyName("timestamp")]
-        internal string TimestampeString
+        public string TimestampeString
         {
             get
             {

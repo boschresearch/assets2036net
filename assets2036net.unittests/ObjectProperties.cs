@@ -52,11 +52,8 @@ namespace assets2036net.unittests
 
             assetOwner.Submodel("properties").Property("an_object").Value = complexValue;
 
-            object test = assetConsumer.Submodel("properties").Property("an_object").Value;
 
-            Assert.Equal(
-                complexValue,
-                assetOwner.Submodel("properties").Property("an_object").Value);
+            Assert.Throws<Exception>(() => assetOwner.Submodel("properties").Property("an_object").Value); 
 
             //Thread.Sleep(Settings.WaitTime);
 
@@ -73,7 +70,7 @@ namespace assets2036net.unittests
                 //     assetConsumer.Submodel("properties").Property("an_object").GetValueAs<Dictionary<string, object>>().ToString()); 
 
                 return complexValue.ToString().Equals(
-                    assetConsumer.Submodel("properties").Property("an_object").GetValueAs<Dictionary<string, object>>().ToString()); 
+                    assetConsumer.Submodel("properties").Property("an_object").ValueAs<Dictionary<string, object>>().ToString()); 
 
             }, Settings.WaitTime));
 
@@ -81,7 +78,8 @@ namespace assets2036net.unittests
             //    complexValue,
             //    assetConsumer.Submodel("properties").Property("an_object").Value);
 
-            var test2 = assetConsumer.Submodel("properties").Property("an_object").GetValueAs<ComplexType>();
+            var test2 = assetConsumer.Submodel("properties").Property("an_object").ValueAs<ComplexType>();
+
         }
     }
 }

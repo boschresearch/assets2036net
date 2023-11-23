@@ -43,15 +43,14 @@ namespace assets2036net.unittests
                 TimeSpan.FromSeconds(5));
 
             // check result: 
-            JsonElement res = (JsonElement)response;
 
             Assert.Equal(
                 "A",
-                res.GetProperty("first_letter").GetString());
+                response.GetReturnValueOrDefault<Dictionary<string, string>>()["first_letter"]); 
 
             Assert.Equal(
                 "Z",
-                res.GetProperty("last_letter").GetString());
+                response.GetReturnValueOrDefault<Dictionary<string, string>>()["last_letter"]); 
         }
 
         private SubmodelOperationResponse callBackSplitString(SubmodelOperationRequest req)
@@ -86,34 +85,42 @@ namespace assets2036net.unittests
             // bind local operation to asset operation
             assetOwner.Submodel("object_operation").Operation("getfirstparam").Callback = (SubmodelOperationRequest req) =>
             {
-                string result = ((JsonElement)req.Parameters["tuple"]).GetProperty("first").GetString(); 
+                var person = req.GetParameterAs<Person>("papa"); 
 
                 var response = req.CreateResponseObj();
-                response.Value = result;
+                response.Value = person.age + person.kids[0].age;
                 return response;
             }; 
 
-            string testValue = "Eins"; 
+            int testValue1 = 99; 
+            int testValue2 = 199; 
 
             var response = assetConsumer.Submodel("object_operation").Operation("getfirstparam").Invoke(
-                new Dictionary<string, object>()
+                new Dictionary<string, object>
                 {
                     {
-                        "tuple",  new Dictionary<string, object>()
+                        "papa", 
+                        new Person
                         {
-                            {"first", testValue},
-                            {"second", "Zwei"}
+                            age = testValue1, 
+                            name = "Thomas", 
+                            kids = new List<Person>
+                            {
+                                new ()
+                                {
+                                    age = testValue2, name = "Karla"
+                                }
+                            }
                         }
                     }
-                }
-                ,
+                },
                 TimeSpan.FromSeconds(5));
 
             // check result: 
-            string res = ((JsonElement)response).GetString(); 
+            int res = response.GetReturnValueOrDefault<int>(); 
 
             Assert.Equal(
-                testValue,
+                testValue1+testValue2,
                 res);
         }
 
@@ -163,8 +170,7 @@ namespace assets2036net.unittests
                 new Dictionary<string, object>(), 
                 TimeSpan.FromSeconds(5));
 
-            var je = (JsonElement)response; 
-            var papa = je.Deserialize<Person>(); 
+            var papa = response.GetReturnValueOrDefault<Person>(); 
 
             // // check result: 
             // JObject joPapa = response as JObject;
@@ -213,7 +219,7 @@ namespace assets2036net.unittests
                 TimeSpan.FromSeconds(5));
 
             // check result: 
-            double res = ((JsonElement)response).GetDouble(); 
+            double res = response.GetReturnValueOrDefault<double>(); 
 
             Assert.Equal(
                 26.5,
@@ -248,15 +254,10 @@ namespace assets2036net.unittests
 
             var result = assetConsumer.Submodel("object_operation").Operation("arrayoperation").Invoke(new Dictionary<string, object>());
 
-            Assert.Equal(5, ((JsonElement)result).GetArrayLength());
-            Assert.Equal(2.0, ((JsonElement)result)[2].GetInt32()); 
+            Assert.Equal(5, result.GetReturnValueOrDefault<double[]>().Length);
+            Assert.Equal(2.0, result.GetReturnValueOrDefault<double[]>()[2]); 
         }
 
-        class Person
-        {
-            public int age {get;set;}
-            public string name{get;set;}
-            public List<Person> kids{get;set;}
-        };
+
     }
 }

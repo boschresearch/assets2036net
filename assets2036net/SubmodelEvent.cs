@@ -62,7 +62,7 @@ namespace assets2036net
 
             Asset.publish(
                 Topic,      
-                JsonSerializer.Serialize(emission,  Tools.JsonSerializerOptions),
+                JsonSerializer.Serialize(emission, Tools.JsonSerializerOptions),
                 false);
         }
 

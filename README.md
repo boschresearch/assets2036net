@@ -3,8 +3,7 @@
 ## Description
 
 The assets2036net library and package supports .NET developers in participating in the 
-assets2036 MQTT-based communication. It depends on M2MqttDotNetCore for MQTT communication, 
-Newtonsoft.Json for JSON serialization and log4net for logging. 
+assets2036 MQTT-based communication. It depends on M2MqttDotNetCore for MQTT communication. 
 
 ## Getting started
 
@@ -31,23 +30,13 @@ submodel descriptions (JSON model files read from submodel repository) as well a
 to the submodel elements at runtime. This might lead to some confusion and sometimes made it 
 impossible to strictly hide unneccessary aspects of the API from the developer. 
 
-* The library uses Newtonsoft.Json for JSON (de-)serialization of the submodels as well as for 
-(de-)serialization of the messages payload. To avoid the need for precompiler steps to create 
-message payload specific code / classes, payload is handled in a completely generic way. This 
-means, each parameter or property value you read, will internally be of type 
-Newtonsoft.Json.Linq.JToken and nothing more. To get typed values or references, you have to 
-take care of casting / converting by yourself. You will find examples of how the casting to 
-simple and composite types (arrays, objects) is done in the unit tests and in the example project 
-SimplePropertyAndOperation. 
-
 ## Dependencies (NuGet)
 
 ### assets2036net library
 
 - log4net	2.0.13	Apache-2.0
 - MQTTNet	3.1.1	MIT 
-- Newtonsoft.Json	13.0.1	MIT
-		
+
 ### assets2036 unittests
 - Microsoft.NET.Test.Sdk	17.0.0	MIT 
 - xunit	2.4.1	MIT 

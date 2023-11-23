@@ -73,7 +73,6 @@ namespace assets2036net
                 log.Error($"error during deserialization of return value to type {typeof(T)}: {e}"); 
                 return default; 
             }
-            
         }
     }
 }

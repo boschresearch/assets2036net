@@ -51,13 +51,15 @@ namespace assets2036net.unittests
             {
                 for (int i = 0; i < numberCalls; ++i)
                 {
-                    Assert.Equal(
-                        (double)i * i,
-                        ((JsonElement)assetConsumer1.Submodel("math").Operation("square").Invoke(new Dictionary<string, object>()
+                    var prod = assetConsumer1.Submodel("math").Operation("square").Invoke(new Dictionary<string, object>()
                         {
                             {"x", i }
                         }, 
-                        Settings.WaitTime)).GetDouble());
+                        Settings.WaitTime); 
+
+                    Assert.Equal(
+                        (double)i * i,
+                        prod.GetReturnValueOrDefault<double>()); 
 
                     //Thread.Sleep(new Random().Next(0, 5));
                 }
@@ -68,13 +70,15 @@ namespace assets2036net.unittests
             {
                 for (int i = 0; i < numberCalls; ++i)
                 {
-                    Assert.Equal(
-                        (double)Math.Sqrt(i),
-                        ((JsonElement)assetConsumer1.Submodel("math").Operation("sqrt").Invoke(new Dictionary<string, object>()
+                    var sqrt = assetConsumer1.Submodel("math").Operation("sqrt").Invoke(new Dictionary<string, object>()
                         {
                             {"x", i }
                         }, 
-                        Settings.WaitTime)).GetDouble());
+                        Settings.WaitTime).GetReturnValueOrDefault<double>(); 
+
+                    Assert.Equal(
+                        (double)Math.Sqrt(i),
+                        sqrt); 
 
                     //Thread.Sleep(new Random().Next(0, 5));
                 }
@@ -85,13 +89,16 @@ namespace assets2036net.unittests
             {
                 for (int i = numberCalls; i > 0; --i)
                 {
+                    var sqrt = assetConsumer1.Submodel("math").Operation("sqrt").Invoke(new Dictionary<string, object>()
+                        {
+                            {"x", i }
+                        }, 
+                        Settings.WaitTime).GetReturnValueOrDefault<double>(); 
+
                     Assert.Equal(
                         (double)Math.Sqrt(i),
-                        ((JsonElement)assetConsumer1.Submodel("math").Operation("sqrt").Invoke(new Dictionary<string, object>()
-                            {
-                                {"x", i }
-                            }, 
-                            Settings.WaitTime)).GetDouble());
+                        sqrt); 
+
 
                     Thread.Sleep(new Random().Next(0, 5));
                 }
@@ -100,13 +107,16 @@ namespace assets2036net.unittests
 
             for (int i = numberCalls; i >= 1; --i)
             {
-                Assert.Equal(
-                    Math.Sin(i),
-                    ((JsonElement)assetConsumer1.Submodel("math").Operation("sin").Invoke(new Dictionary<string, object>()
-                    {
-                        {"x", i }
-                    }, 
-                    Settings.WaitTime)).GetDouble());
+                    var sin = assetConsumer1.Submodel("math").Operation("sin").Invoke(new Dictionary<string, object>()
+                        {
+                            {"x", i }
+                        }, 
+                        Settings.WaitTime).GetReturnValueOrDefault<double>(); 
+
+                    Assert.Equal(
+                        (double)Math.Sin(i),
+                        sin); 
+
 
                 Thread.Sleep(new Random().Next(0, 5));
             }

@@ -83,7 +83,7 @@ namespace assets2036net.unittests
             // check result: 
             Assert.Equal(
                 2.5 + 7.7,
-                ((JsonElement)response).GetDouble()); 
+                response.GetReturnValueOrDefault<double>()); 
         }
 
         private SubmodelOperationResponse callBackAdd(SubmodelOperationRequest req)

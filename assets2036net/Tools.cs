@@ -20,7 +20,7 @@ namespace assets2036net
     {
         public static JsonSerializerOptions JsonSerializerOptions = new JsonSerializerOptions()
         {
-            Converters = { new JsonStringEnumConverter() }, 
+            // Converters = { new JsonStringEnumConverter() }, 
             DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
         }; 
 

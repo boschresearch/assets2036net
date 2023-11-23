@@ -28,7 +28,7 @@ namespace assets2036net.unittests
             AssetMgr mgr = new AssetMgr(Settings.BrokerHost, Settings.BrokerPort, @namespace, Settings.EndpointName);
 
             Asset assetOwner = mgr.CreateAsset(Settings.RootTopic, assetName, uri);
-            Asset assetConsumer = mgr.CreateAssetProxy(Settings.RootTopic, assetName, uri);
+            Asset assetConsumer = mgr.CreateFullAssetProxy(Settings.RootTopic, assetName);
 
             // now there is an asset _endpoint
             Assert.NotNull(mgr.EndpointAsset);
@@ -36,17 +36,21 @@ namespace assets2036net.unittests
             // the explicitely built asset is no endpoint
             Assert.Null(assetOwner.SubmodelEndpoint);
 
+            Thread.Sleep(TimeSpan.FromMilliseconds(300));
+
             // get the _meta properties
             Assert.Equal(
-                Settings.EndpointName,
-                assetOwner.Submodel("properties").Property(StringConstants.PropertyNameMeta).ValueObject[StringConstants.PropertyNameMetaSource].ToString());
+                Topic.From(@namespace, Settings.EndpointName),
+                assetConsumer.Submodel("properties").MetaPropertyValue.Source.ToString());
 
-            Assert.True(mgr.EndpointAsset.SubmodelEndpoint.Property(StringConstants.PropertyNameOnline).ValueBool);
-            Assert.False(mgr.EndpointAsset.SubmodelEndpoint.Property(StringConstants.PropertyNameHealthy).ValueBool);
+            
+            var metaValue = assetConsumer.Submodel("properties").MetaPropertyValue; 
 
-            //Assert.Equal(
-            //    Settings.EndpointName,
-            //    assetOwner.Submodel("properties").Origin);
+            var endpointProxy = mgr.CreateFullAssetProxy(metaValue.Source.Split('/')[0], metaValue.Source.Split('/')[1]); 
+            Thread.Sleep(TimeSpan.FromMilliseconds(300));
+
+
+            Assert.True(endpointProxy.SubmodelEndpoint.Property(StringConstants.PropertyNameOnline).ValueBool);
 
             mgr.EndpointAsset.Healthy = true;
 

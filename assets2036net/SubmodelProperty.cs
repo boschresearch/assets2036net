@@ -97,15 +97,15 @@ namespace assets2036net
                     throw new Exception("You cannot set property values on an asset proxy"); 
                 }
 
-                if (value != _value)
-                {
+                // if (value != _value)
+                // {
                     _value = value;
 
                     if (Asset != null)
                     {
                         Publish();
                     }
-                }
+                // }
             }
         }
 

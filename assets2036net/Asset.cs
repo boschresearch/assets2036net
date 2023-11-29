@@ -96,6 +96,15 @@ namespace assets2036net
             return _submodels[name];
         }
 
+        /// <summary>
+        /// removes all submodels' properties from broker by resetting the retained messages. 
+        /// </summary>
+        /// <returns></returns>
+        public void RemoveAllSubmodelsPropertiesFromBroker()
+        {
+            Submodels.ForEach((Submodel sm) => sm.RemovePropertiesFromBroker()); 
+        }
+
         internal Asset(string @namespace, string name, AssetMgr assetMgr)
         {
             _submodels = new Dictionary<string, Submodel>();

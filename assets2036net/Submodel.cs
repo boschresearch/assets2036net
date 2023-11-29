@@ -123,6 +123,18 @@ namespace assets2036net
             return p; 
         }
 
+        /// <summary>
+        /// removes all properties from broker by resetting the retained messages. 
+        /// </summary>
+        /// <returns></returns>
+        public void RemovePropertiesFromBroker()
+        {
+            foreach(var p in Properties.Values)
+            {
+                p.RemoveFromBroker(); 
+            }
+        }
+
         private Dictionary<string, SubmodelProperty> _properties;
 
         [JsonPropertyName("properties")]

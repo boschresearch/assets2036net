@@ -113,18 +113,31 @@ namespace assets2036net
 
         private static readonly log4net.ILog log = Config.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType.FullName);
 
+        /// <summary>
+        /// removes from broker by resetting the retained message. 
+        /// </summary>
+        /// <returns></returns>
+        public void RemoveFromBroker()
+        {
+            if (Asset.Initialized())
+            {
+                AssetMgr.Publish(Topic, null, true); 
+            }
+        }
+
         internal void Publish()
         {
             if (Asset.Initialized())
             {
-                // compare serialized values to check if publish
-                string json = JsonSerializer.Serialize(
+                string json = null; 
+
+                json = JsonSerializer.Serialize(
                     _value, 
-                     Tools.JsonSerializerOptions);
-                     
+                    Tools.JsonSerializerOptions);
+
                 if (json != _latestPublishedValueJson)
                 {
-                    Asset.publish(Topic, json, true);
+                    AssetMgr.Publish(Topic, json, true); 
                     _latestPublishedValueJson = json;
                 }
             }

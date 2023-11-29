@@ -620,14 +620,27 @@ namespace assets2036net
             {
                 lock (unpublishedMessagedLock)
                 {
-                    var message = new MqttApplicationMessageBuilder()
-                        .WithTopic(topic)
-                        .WithPayload(text)
-                        .WithExactlyOnceQoS()
-                        .WithRetainFlag(retain)
-                        .Build();
+                    if (text != null)
+                    {
+                        var message = new MqttApplicationMessageBuilder()
+                            .WithTopic(topic)
+                            .WithPayload(text)
+                            .WithExactlyOnceQoS()
+                            .WithRetainFlag(retain)
+                            .Build();
 
-                    _mqttClient.PublishAsync(message); 
+                        _mqttClient.PublishAsync(message); 
+                    }
+                    else
+                    {
+                        var message = new MqttApplicationMessageBuilder()
+                            .WithTopic(topic)
+                            .WithExactlyOnceQoS()
+                            .WithRetainFlag(retain)
+                            .Build();
+
+                        _mqttClient.PublishAsync(message); 
+                    }
                 }
             }
             catch (Exception e)

@@ -10,22 +10,14 @@ namespace assets2036net
     /// <summary>
     /// All valid datatypes for submodel properties. Aligned with JSON schema data types. 
     /// </summary>
-    // [JsonConverter(typeof(StringEnumConverter))]
-    public enum ValueType
+    public class ValueType 
     {
-        [EnumMember(Value ="boolean")]
-        boolean,
-        [EnumMember(Value = "string")]
-        @string,
-        [EnumMember(Value = "object")]
-        @object,
-        [EnumMember(Value = "array")]
-        array,
-        [EnumMember(Value = "integer")]
-        integer,
-        [EnumMember(Value = "number")]
-        number,
-        [EnumMember(Value = "list")]
-        list,
+        const string @boolean = "boolean"; 
+        const string @string = "string"; 
+        const string @object = "object"; 
+        const string @array = "array"; 
+        const string @integer = "integer"; 
+        const string @number = "number"; 
+        const string @list = "list"; 
     }
 }

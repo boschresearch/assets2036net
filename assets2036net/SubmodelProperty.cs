@@ -46,7 +46,7 @@ namespace assets2036net
         /// The property's datatype. <seealso cref="ValueType"/>
         /// </summary>
         [JsonPropertyName("type")]
-        public ValueType Type { get; set; }
+        public string Type { get; set; }
 
         internal void updateLocalValue(object newValue)
         {

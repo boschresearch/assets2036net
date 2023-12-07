@@ -39,12 +39,6 @@ namespace assets2036net
 
 
         /// <summary>
-        /// When set to true, AssetMgr tries automatic reconnect to MQTT broker, when connection 
-        /// is lost during healthyCheck. 
-        /// </summary>
-        public bool AutomaticReconnectOnConnectionLost { get; set; }
-
-        /// <summary>
         /// AssetMgr Constructor. 
         /// </summary>
         /// <param name="host">The MQTT Broker's hostname. Valid Examples:

@@ -4,6 +4,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using MQTTnet;
+using MQTTnet.Client;
+using MQTTnet.Packets;
 using System;
 using System.Collections.Generic;
 using System.Text.Json;
@@ -37,7 +39,7 @@ namespace assets2036net
 
                 var topicsToDelete = new List<string>();
 
-                mqttClient.ApplicationMessageReceivedHandler = new GenericApplicationMessageHandler((MqttApplicationMessageReceivedEventArgs eventArgs) =>
+                mqttClient.ApplicationMessageReceivedAsync += (MqttApplicationMessageReceivedEventArgs eventArgs) => 
                 {
                     if (eventArgs.ApplicationMessage.Retain)
                     {
@@ -45,22 +47,19 @@ namespace assets2036net
                     }
 
                     return Task.CompletedTask;
-                }); 
+                }; 
 
 
-                mqttClient.ConnectedHandler = new GenericClientConnectedHandler()
+                mqttClient.ConnectedAsync += (MqttClientConnectedEventArgs evtArgs) => 
                 {
-                    TheHandler = (MqttClientConnectedEventArgs eventArgs) =>
-                    {
-                        var topics = new MqttClientSubscribeOptionsBuilder()
-                            .WithTopicFilter(new MqttTopicFilter()
-                            {
-                                Topic = string.Format("{0}/{1}/#", @namespace, name),
-                                QualityOfServiceLevel = MQTTnet.Protocol.MqttQualityOfServiceLevel.ExactlyOnce
-                            });
+                    var topics = new MqttClientSubscribeOptionsBuilder()
+                        .WithTopicFilter(new MqttTopicFilter()
+                        {
+                            Topic = string.Format("{0}/{1}/#", @namespace, name),
+                            QualityOfServiceLevel = MQTTnet.Protocol.MqttQualityOfServiceLevel.ExactlyOnce
+                        });
 
-                        return mqttClient.SubscribeAsync(topics.Build(), CancellationToken.None);
-                    }
+                    return mqttClient.SubscribeAsync(topics.Build(), CancellationToken.None);
                 };
 
                 var options = new MqttClientOptionsBuilder()
@@ -77,7 +76,7 @@ namespace assets2036net
                 {
                     var mb = new MqttApplicationMessageBuilder()
                         .WithTopic(t)
-                        .WithExactlyOnceQoS()
+                        .WithQualityOfServiceLevel(MQTTnet.Protocol.MqttQualityOfServiceLevel.ExactlyOnce)
                         .WithPayload(new byte[] { })
                         .WithRetainFlag(); 
 
@@ -106,35 +105,32 @@ namespace assets2036net
             {
                 var tasks = new List<Task>();
 
-                client.ApplicationMessageReceivedHandler = new GenericApplicationMessageHandler((MqttApplicationMessageReceivedEventArgs e) =>
+                client.ApplicationMessageReceivedAsync += (MqttApplicationMessageReceivedEventArgs e) => 
                 {
                     if (e.ApplicationMessage.Retain)
                     {
                         tasks.Add(client.PublishAsync(
                             new MqttApplicationMessageBuilder()
-                                .WithExactlyOnceQoS()
+                                .WithQualityOfServiceLevel(MQTTnet.Protocol.MqttQualityOfServiceLevel.ExactlyOnce)
                                 .WithPayload(new byte[] { })
                                 .WithRetainFlag().Build(), 
                             CancellationToken.None)); 
                     }
 
                     return Task.CompletedTask; 
-                });
+                };
 
-                client.ConnectedHandler = new GenericClientConnectedHandler()
+                client.ConnectedAsync += (MqttClientConnectedEventArgs evtArgs) => 
                 {
-                    TheHandler = (MqttClientConnectedEventArgs eventArgs) =>
+                    return Task.Run(() =>
                     {
-                        return Task.Run(() =>
-                        {
-                            client.SubscribeAsync(new MqttClientSubscribeOptionsBuilder()
-                                .WithTopicFilter(new MqttTopicFilter()
-                                {
-                                    Topic = rootTopic + "/#"
-                                }).Build(),
-                                CancellationToken.None);
-                        });
-                    }
+                        client.SubscribeAsync(new MqttClientSubscribeOptionsBuilder()
+                            .WithTopicFilter(new MqttTopicFilter()
+                            {
+                                Topic = rootTopic + "/#"
+                            }).Build(),
+                            CancellationToken.None);
+                    });
                 };
 
                 var options = new MqttClientOptionsBuilder()

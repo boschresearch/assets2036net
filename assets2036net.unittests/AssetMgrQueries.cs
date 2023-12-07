@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using MQTTnet;
-using MQTTnet.Client.Options;
+using MQTTnet.Client;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -82,10 +82,10 @@ namespace assets2036net.unittests
             var factory = new MqttFactory();
             using (var mqttClient = factory.CreateMqttClient())
             {
-                mqttClient.ApplicationMessageReceivedHandler = new GenericApplicationMessageHandler((MqttApplicationMessageReceivedEventArgs eventArgs) =>
+                mqttClient.ApplicationMessageReceivedAsync += (MqttApplicationMessageReceivedEventArgs eventArgs) => 
                 {
                     throw new Exception(string.Format("Received unexpected message on topic {0}", eventArgs.ApplicationMessage.Topic));
-                }); 
+                }; 
 
                 var options = new MqttClientOptionsBuilder()
                     .WithTcpServer(Settings.BrokerHost, Settings.BrokerPort)

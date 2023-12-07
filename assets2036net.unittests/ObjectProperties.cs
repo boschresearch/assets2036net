@@ -57,6 +57,7 @@ namespace assets2036net.unittests
 
             //Thread.Sleep(Settings.WaitTime);
 
+            Thread.Sleep(300); 
 
             Assert.True(waitForCondition(() =>
             {
@@ -73,10 +74,6 @@ namespace assets2036net.unittests
                     assetConsumer.Submodel("properties").Property("an_object").ValueAs<Dictionary<string, object>>().ToString()); 
 
             }, Settings.WaitTime));
-
-            //Assert.Equal(
-            //    complexValue,
-            //    assetConsumer.Submodel("properties").Property("an_object").Value);
 
             var test2 = assetConsumer.Submodel("properties").Property("an_object").ValueAs<ComplexType>();
 

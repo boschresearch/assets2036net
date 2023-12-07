@@ -114,6 +114,38 @@ namespace assets2036net.unittests
                 return assetConsumer.Submodel("properties").Property("truth").ValueBool;
             }, Settings.WaitTime));
         }
+
+        [Fact]
+        public void RemoveRetainedProperties()
+        {
+            string location = this.GetType().Assembly.Location;
+            location = Path.GetDirectoryName(location);
+            location = Path.Combine(location, "resources/properties.json");
+            Uri uri = new Uri(location);
+
+            AssetMgr mgr = new AssetMgr(Settings.BrokerHost, Settings.BrokerPort, Settings.RootTopic, Settings.EndpointName);
+
+            Asset assetOwner = mgr.CreateAsset(Settings.RootTopic, "WriteAndReadBoolProperty", uri);
+            Asset assetConsumer = mgr.CreateAssetProxy(Settings.RootTopic, "WriteAndReadBoolProperty", uri);
+
+
+            assetOwner.Submodel("properties").Property("truth").Value = true;
+
+            Assert.True(waitForCondition(() =>
+            {
+                return assetConsumer.Submodel("properties").Property("truth").ValueBool;
+            }, Settings.WaitTime));
+
+            assetOwner.Submodel("properties").Property("truth").Value = null;
+
+            Assert.True(waitForCondition(() =>
+            {
+                return assetConsumer.Submodel("properties").Property("truth").Value == null;
+            }, Settings.WaitTime));
+
+
+            assetOwner.RemoveAllSubmodelsPropertiesFromBroker(); 
+        }
     }
 }
 

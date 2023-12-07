@@ -5,10 +5,6 @@
 
 //using System;
 using MQTTnet;
-using MQTTnet.Client.Connecting;
-using MQTTnet.Client.Options;
-using MQTTnet.Client.Receiving;
-using MQTTnet.Client.Subscribing;
 using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization.Json;
@@ -19,7 +15,7 @@ using System.Threading.Tasks;
 
 namespace assets2036net
 {
-    public class GenericApplicationMessageHandler : IMqttApplicationMessageReceivedHandler
+    public class GenericApplicationMessageHandler 
     {
         public GenericApplicationMessageHandler(Handler a)
         {
@@ -41,9 +37,8 @@ namespace assets2036net
         }
     }
 
-    class GenericClientConnectedHandler : IMqttClientConnectedHandler
+    class GenericClientConnectedHandler
     {
-        public delegate Task Handler(MqttClientConnectedEventArgs eventArgs);
 
         public Handler TheHandler;
 

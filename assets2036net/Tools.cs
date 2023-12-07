@@ -4,9 +4,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using MQTTnet;
-using MQTTnet.Client.Connecting;
-using MQTTnet.Client.Options;
-using MQTTnet.Client.Subscribing;
 using System;
 using System.Collections.Generic;
 using System.Text.Json;

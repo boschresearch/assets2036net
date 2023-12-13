@@ -19,7 +19,7 @@ namespace assets2036net.unittests
         public static string EndpointName = "assets2036nettest_endpoint"; 
 
         public static TimeSpan WaitTime = TimeSpan.FromSeconds(3);
-        public static string RootTopic = "arena2036nettest";
+        public static string Namespace = "assets2036nettest";
 
         public static Uri GetUriToEndpointSubmodel()
         {

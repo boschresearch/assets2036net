@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace assets2036net.unittests
@@ -23,12 +24,15 @@ namespace assets2036net.unittests
             location = Path.Combine(location, "resources/properties.json");
             Uri uri = new Uri(location);
 
-            string @namespace = Settings.RootTopic;
+            string @namespace = Settings.Namespace;
             string assetName = "MetaInformationExistance"; 
-            AssetMgr mgr = new AssetMgr(Settings.BrokerHost, Settings.BrokerPort, @namespace, Settings.EndpointName);
 
-            Asset assetOwner = mgr.CreateAsset(Settings.RootTopic, assetName, uri);
-            Asset assetConsumer = mgr.CreateFullAssetProxy(Settings.RootTopic, assetName);
+            string endpointname = Settings.EndpointName+"_metatest"; 
+
+            using AssetMgr mgr = new AssetMgr(Settings.BrokerHost, Settings.BrokerPort, @namespace, endpointname);
+
+            using Asset assetOwner = mgr.CreateAsset(Settings.Namespace, assetName, uri);
+            using Asset assetConsumer = mgr.CreateFullAssetProxy(Settings.Namespace, assetName);
 
             // now there is an asset _endpoint
             Assert.NotNull(mgr.EndpointAsset);
@@ -40,13 +44,13 @@ namespace assets2036net.unittests
 
             // get the _meta properties
             Assert.Equal(
-                Topic.From(@namespace, Settings.EndpointName),
+                Topic.From(@namespace, endpointname),
                 assetConsumer.Submodel("properties").MetaPropertyValue.Source.ToString());
 
             
             var metaValue = assetConsumer.Submodel("properties").MetaPropertyValue; 
 
-            var endpointProxy = mgr.CreateFullAssetProxy(metaValue.Source.Split('/')[0], metaValue.Source.Split('/')[1]); 
+            using var endpointProxy = mgr.CreateFullAssetProxy(metaValue.Source.Split('/')[0], metaValue.Source.Split('/')[1]); 
             Thread.Sleep(TimeSpan.FromMilliseconds(300));
 
 
@@ -55,9 +59,9 @@ namespace assets2036net.unittests
             mgr.EndpointAsset.Healthy = true;
 
             // Create asset to read _endpoint submodel: 
-            var endpointConsumer = mgr.CreateAssetProxy(
-                Settings.RootTopic, 
-                Settings.EndpointName, 
+            using var endpointConsumer = mgr.CreateAssetProxy(
+                Settings.Namespace, 
+                endpointname, 
                 Settings.GetUriToEndpointSubmodel());
 
             //Thread.Sleep(Settings.WaitTime);
@@ -66,12 +70,18 @@ namespace assets2036net.unittests
             // Assert.True(endpointConsumer.SubmodelEndpoint.Property(StringConstants.PropertyNameOnline).ValueBool);
             // Assert.True(endpointConsumer.SubmodelEndpoint.Property(StringConstants.PropertyNameHealthy).ValueBool);
 
-            // connect to log event... 
-            endpointConsumer.SubmodelEndpoint.Event("log").Emission += this.handleLogEvent; 
-
             _receivedLogMessage = "";
+            
+            // connect to log event... 
+            endpointConsumer.SubmodelEndpoint.Event("log").Emission += (SubmodelEventMessage msg) => 
+            {
+                _receivedLogMessage = msg.GetParameterString("entry"); 
+            }; 
+
             string msg = "Here comes the logging message. Read it. Or dont. Whatever."; 
             mgr.EndpointAsset.log(msg);
+
+            Task.Delay(10000); 
 
             Assert.True(waitForCondition(() =>
             {
@@ -81,10 +91,5 @@ namespace assets2036net.unittests
         }
 
         private string _receivedLogMessage; 
-
-        void handleLogEvent(SubmodelEventMessage msg)
-        {
-            _receivedLogMessage = Convert.ToString(msg.Parameters["entry"]); 
-        }
     }
 }

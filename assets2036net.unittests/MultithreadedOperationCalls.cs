@@ -31,17 +31,17 @@ namespace assets2036net.unittests
             location = Path.Combine(location, "resources/math.json");
             Uri uri = new Uri(location);
 
-            AssetMgr mgrOwner = new AssetMgr(Settings.BrokerHost, Settings.BrokerPort, Settings.RootTopic, Settings.EndpointName);
-            Asset assetOwner = mgrOwner.CreateAsset(Settings.RootTopic, "ConcurrentCustomers", uri);
+            using AssetMgr mgrOwner = new AssetMgr(Settings.BrokerHost, Settings.BrokerPort, Settings.Namespace, Settings.EndpointName);
+            using Asset assetOwner = mgrOwner.CreateAsset(Settings.Namespace, "ConcurrentCustomers", uri);
 
             // bind local operation to asset operation
             assetOwner.Submodel("math").Operation("square").Callback = this.square;
             assetOwner.Submodel("math").Operation("sqrt").Callback = this.sqrt;
             assetOwner.Submodel("math").Operation("sin").Callback = this.sin;
 
-            AssetMgr mgrConsumer = new AssetMgr(Settings.BrokerHost, Settings.BrokerPort, Settings.RootTopic, Settings.EndpointName);
+            using AssetMgr mgrConsumer = new AssetMgr(Settings.BrokerHost, Settings.BrokerPort, Settings.Namespace, Settings.EndpointName);
 
-            Asset assetConsumer1 = mgrConsumer.CreateAssetProxy(Settings.RootTopic, "ConcurrentCustomers", uri);
+            using Asset assetConsumer1 = mgrConsumer.CreateAssetProxy(Settings.Namespace, "ConcurrentCustomers", uri);
             //Asset assetConsumer2 = mgrConsumer.CreateAsset("ConcurrentCustomers", Mode.Consumer, uri);
             //Asset assetConsumer3 = mgrConsumer.CreateAsset("ConcurrentCustomers", Mode.Consumer, uri);
 

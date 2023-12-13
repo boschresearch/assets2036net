@@ -16,6 +16,8 @@ namespace assets2036net.unittests
 {
     public class UnitTestBase
     {
+        protected object TheOneLock = new object(); 
+
         protected ILog log { get; private set; }
         public UnitTestBase()
         {

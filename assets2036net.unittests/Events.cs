@@ -23,11 +23,11 @@ namespace assets2036net.unittests
             location = Path.Combine(location, "resources/events.json");
             Uri uri = new Uri(location);
 
-            AssetMgr mgrOwner = new AssetMgr(Settings.BrokerHost, Settings.BrokerPort, Settings.RootTopic, Settings.EndpointName);
-            AssetMgr mgrConsumer = new AssetMgr(Settings.BrokerHost, Settings.BrokerPort, Settings.RootTopic, Settings.EndpointName);
+            using AssetMgr mgrOwner = new AssetMgr(Settings.BrokerHost, Settings.BrokerPort, Settings.Namespace, Settings.EndpointName);
+            using AssetMgr mgrConsumer = new AssetMgr(Settings.BrokerHost, Settings.BrokerPort, Settings.Namespace, Settings.EndpointName);
 
-            Asset assetOwner = mgrOwner.CreateAsset(Settings.RootTopic, "EventWithComplexParameters", uri);
-            Asset assetConsumer = mgrConsumer.CreateAssetProxy(Settings.RootTopic, "EventWithComplexParameters", uri);
+            using Asset assetOwner = mgrOwner.CreateAsset(Settings.Namespace, "EventWithComplexParameters", uri);
+            using Asset assetConsumer = mgrConsumer.CreateAssetProxy(Settings.Namespace, "EventWithComplexParameters", uri);
 
             // bind local eventlistener to event
             assetConsumer.Submodel("events").Event("anevent").Emission += this.handleEvent; 

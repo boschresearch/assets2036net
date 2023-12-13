@@ -18,7 +18,7 @@ namespace assets2036net.unittests
         [Fact]
         public void _CleanAllRetainedMessages()
         {
-            Tools.CleanAllRetainedMessages(Settings.BrokerHost, Settings.BrokerPort, Settings.RootTopic);
+            Tools.CleanAllRetainedMessages(Settings.BrokerHost, Settings.BrokerPort, Settings.Namespace);
             //Thread.Sleep(5000);
         }
     }

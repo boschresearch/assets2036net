@@ -31,10 +31,10 @@ namespace assets2036net.unittests
             Uri uri = new Uri(location);
 
 
-            AssetMgr mgr = new AssetMgr(Settings.BrokerHost, Settings.BrokerPort, Settings.RootTopic, Settings.EndpointName);
+            using AssetMgr mgr = new AssetMgr(Settings.BrokerHost, Settings.BrokerPort, Settings.Namespace, Settings.EndpointName);
 
-            Asset assetOwner = mgr.CreateAsset(Settings.RootTopic, Settings.EndpointName, uri);
-            Asset assetConsumer = mgr.CreateAssetProxy(Settings.RootTopic, Settings.EndpointName, uri);
+            using Asset assetOwner = mgr.CreateAsset(Settings.Namespace, "ObjectProperties", uri);
+            using Asset assetConsumer = mgr.CreateAssetProxy(Settings.Namespace, "ObjectProperties", uri);
 
             var complexValue = new Dictionary<string, object>()
             {

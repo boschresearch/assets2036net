@@ -21,11 +21,11 @@ namespace assets2036net.unittests
             location = Path.Combine(location, "resources/object_operation.json");
             Uri uri = new Uri(location);
 
-            AssetMgr mgrOwner = new AssetMgr(Settings.BrokerHost, Settings.BrokerPort, Settings.RootTopic, Settings.EndpointName);
-            AssetMgr mgrConsumer = new AssetMgr(Settings.BrokerHost, Settings.BrokerPort, Settings.RootTopic, Settings.EndpointName);
+            using AssetMgr mgrOwner = new AssetMgr(Settings.BrokerHost, Settings.BrokerPort, Settings.Namespace, Settings.EndpointName);
+            using AssetMgr mgrConsumer = new AssetMgr(Settings.BrokerHost, Settings.BrokerPort, Settings.Namespace, Settings.EndpointName);
 
-            Asset assetOwner = mgrOwner.CreateAsset(Settings.RootTopic, "OperationWithObjectType", uri);
-            Asset assetConsumer = mgrConsumer.CreateAssetProxy(Settings.RootTopic, "OperationWithObjectType", uri);
+            using Asset assetOwner = mgrOwner.CreateAsset(Settings.Namespace, "OperationWithObjectType", uri);
+            using Asset assetConsumer = mgrConsumer.CreateAssetProxy(Settings.Namespace, "OperationWithObjectType", uri);
 
             // bind local operation to asset operation
             assetOwner.Submodel("object_operation").Operation("getfirstparam").Callback = (SubmodelOperationRequest req) =>

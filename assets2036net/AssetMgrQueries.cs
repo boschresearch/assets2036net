@@ -17,7 +17,7 @@ using System.Threading.Tasks;
 
 namespace assets2036net
 {
-    public partial class AssetMgr
+    public partial class AssetMgr : IDisposable
     {
         public List<Submodel> GetSupportedSubmodels(string @namespace, string name)
         {

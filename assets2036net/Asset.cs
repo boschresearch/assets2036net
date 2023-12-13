@@ -17,9 +17,10 @@ namespace assets2036net
     /// <seealso cref="AssetMgr.CreateAssetProxy(string, Uri[])"/>, 
     /// <seealso cref="AssetMgr.CreateFullAssetProxy(string, string)"/>
     /// </summary>
-    public class Asset
+    public class Asset : IDisposable
     {
         private readonly static log4net.ILog log = Config.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType.FullName);
+        private bool disposedValue;
 
         /// <summary>
         /// this' asset's namespace. Set during creation. First part of asset's mqtt messages' topic. 
@@ -178,6 +179,40 @@ namespace assets2036net
         {
             log.DebugFormat("Asset {0} pub: {1} @ {2}", Name, text, topic);
             AssetMgr.Publish(topic, text, retain); 
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    // TODO: dispose managed state (managed objects)
+                }
+
+                // TODO: free unmanaged resources (unmanaged objects) and override finalizer
+                // TODO: set large fields to null
+                if (Mode == Mode.Owner)
+                {
+                    this.RemoveAllSubmodelsPropertiesFromBroker(); 
+                }
+
+                disposedValue = true;
+            }
+        }
+
+        // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
+        ~Asset()
+        {
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: false);
+        }
+
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
         }
     }
 }

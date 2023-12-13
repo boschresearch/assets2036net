@@ -19,7 +19,6 @@ namespace assets2036net
     {
         public static JsonSerializerOptions JsonSerializerOptions = new JsonSerializerOptions()
         {
-            // Converters = { new JsonStringEnumConverter() }, 
             DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
         }; 
 
@@ -30,7 +29,7 @@ namespace assets2036net
         /// <param name="port">port of the MQTT broker (typical: 1883)</param>
         /// <param name="namespace">asset's namespace</param>
         /// <param name="name">asset's name</param>
-        public static void RemoveAssetTrace(string host, int port, string @namespace, string name)
+        public async static Task RemoveAssetTraceAsync(string host, int port, string @namespace, string name)
         {
             var factory = new MqttFactory();
             using (var mqttClient = factory.CreateMqttClient())
@@ -67,9 +66,9 @@ namespace assets2036net
                     .WithTcpServer(host, port)
                     .WithCleanSession();
 
-                mqttClient.ConnectAsync(options.Build(), CancellationToken.None).Wait();
+                var taskConnect = await mqttClient.ConnectAsync(options.Build(), CancellationToken.None); 
 
-                Thread.Sleep(TimeSpan.FromSeconds(1));
+                await Task.Delay(TimeSpan.FromSeconds(2)); 
 
                 List<Task> tasks = new List<Task>(); 
                 foreach (var t in topicsToDelete)

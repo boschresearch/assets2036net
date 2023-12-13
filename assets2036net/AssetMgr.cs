@@ -30,7 +30,7 @@ namespace assets2036net
     /// AssetMgr will create Assets and AssetProxies for you. It holds the MQTT client, which is 
     /// used by all assets and assetProxies created via this. 
     /// </summary>
-    public partial class AssetMgr 
+    public partial class AssetMgr : IDisposable
     {
         /// <summary>
         /// Event is emitted, when connection to MQTT broker is lost
@@ -70,6 +70,7 @@ namespace assets2036net
             _consumerAssets = new ConcurrentDictionary<string, ConcurrentBag<Asset>>();
             _ownerAssets = new ConcurrentDictionary<string, ConcurrentBag<Asset>>();
             _mapReqIdResponse = new ConcurrentDictionary<string, SubmodelOperationResponse>();
+            _mqttKnownSessionId = knownSessionId; 
 
             Connect();
 
@@ -114,40 +115,40 @@ namespace assets2036net
         /// <param name="callback">delegate to check the healthiness status of this asset</param>
         public Func<bool> HealthyCallback
         {
-            get => _healthyCallback; 
+            get => _healthyCallback;
             set
             {
-                _healthyCallback = value; 
-                var healthyProperty = EndpointAsset.Submodel(StringConstants.SubmodelNameEnpoint).Property(StringConstants.PropertyNameHealthy); 
+                _healthyCallback = value;
+                var healthyProperty = EndpointAsset.Submodel(StringConstants.SubmodelNameEnpoint).Property(StringConstants.PropertyNameHealthy);
                 if (value == null)
                 {
-                    _stopHealthyCallbackTask(); 
-                    healthyProperty.Value = false; 
+                    _stopHealthyCallbackTask();
+                    healthyProperty.Value = false;
                 }
                 else
                 {
-                    _stopHealthyCallbackTask(); 
-                    _healthyCallbackTaskCTS = new CancellationTokenSource(); 
-                    _healthyCallbackTask = Task.Run(() => 
+                    _stopHealthyCallbackTask();
+                    _healthyCallbackTaskCTS = new CancellationTokenSource();
+                    _healthyCallbackTask = Task.Run(() =>
                     {
                         while (!_healthyCallbackTaskCTS.Token.IsCancellationRequested)
                         {
                             try
                             {
-                                bool result = _healthyCallback.Invoke(); 
-                                log.Debug($"healthyCallback returned {result}"); 
-                                healthyProperty.Value = result; 
+                                bool result = _healthyCallback.Invoke();
+                                log.Debug($"healthyCallback returned {result}");
+                                healthyProperty.Value = result;
                             }
                             catch (Exception e)
                             {
-                                log.Error($"an error occured during the healthy callback: \n{e}"); 
-                                healthyProperty.Value = false; 
+                                log.Error($"an error occured during the healthy callback: \n{e}");
+                                healthyProperty.Value = false;
                             }
 
-                            Thread.Sleep(HealthyCallbackRefreshRate); 
+                            Thread.Sleep(HealthyCallbackRefreshRate);
                         }
-                    }, 
-                    _healthyCallbackTaskCTS.Token); 
+                    },
+                    _healthyCallbackTaskCTS.Token);
                 }
             }
         }
@@ -156,9 +157,9 @@ namespace assets2036net
         {
             if (_healthyCallbackTask != null)
             {
-                _healthyCallbackTaskCTS.Cancel(); 
-                _healthyCallbackTask.Wait(); 
-                _healthyCallbackTask = null; 
+                _healthyCallbackTaskCTS.Cancel();
+                _healthyCallbackTask.Wait();
+                _healthyCallbackTask = null;
             }
         }
 
@@ -267,7 +268,7 @@ namespace assets2036net
             // }
 
             // return valid;
-            return true; 
+            return true;
         }
 
         private Func<bool> _healthyCallback;
@@ -289,13 +290,13 @@ namespace assets2036net
                     continue;
                 }
 
-                
+
                 var submodel = JsonSerializer.Deserialize<Submodel>(
-                    submodelDefinition, 
+                    submodelDefinition,
                     new JsonSerializerOptions
-                            {
-                                Converters = { new JsonStringEnumConverter() }
-                            });
+                    {
+                        Converters = { new JsonStringEnumConverter() }
+                    });
 
                 submodel.SubmodelUrl = submodelUri.ToString();
 
@@ -311,18 +312,18 @@ namespace assets2036net
             proxy.Mode = Mode.Consumer;
 
             // add meta property to each submodel: 
-            foreach(var submodel in submodels)
+            foreach (var submodel in submodels)
             {
                 submodel.Properties.Add(
-                    StringConstants.PropertyNameMeta, 
+                    StringConstants.PropertyNameMeta,
                     new SubmodelProperty
                     {
-                        Name = StringConstants.PropertyNameMeta, 
-                        Asset = submodel.Asset, 
-                        AssetMgr = submodel.AssetMgr, 
+                        Name = StringConstants.PropertyNameMeta,
+                        Asset = submodel.Asset,
+                        AssetMgr = submodel.AssetMgr,
                         Submodel = submodel
                     }
-                ); 
+                );
             }
 
             if (!_consumerAssets.TryGetValue(proxy.FullName, out ConcurrentBag<Asset> bag))
@@ -333,14 +334,14 @@ namespace assets2036net
             bag.Add(proxy);
 
             var subscriptions = proxy.getSubscriptions(Mode.Consumer);
-            var tasks = new List<Task>(); 
+            var tasks = new List<Task>();
 
-            foreach(var topic in subscriptions)
+            foreach (var topic in subscriptions)
             {
-                tasks.Add(_mqttClient.SubscribeAsync(topic)); 
+                tasks.Add(_mqttClient.SubscribeAsync(topic));
             }
 
-            Task.WaitAll(tasks.ToArray()); 
+            Task.WaitAll(tasks.ToArray());
 
             return proxy;
         }
@@ -378,27 +379,10 @@ namespace assets2036net
 
                 var metaValue = new MetaPropertyValue
                 {
-                    Source = Topic.From(Namespace, this._endpointName), 
+                    Source = Topic.From(Namespace, this._endpointName),
                     SubmodelDefinition = submodel,
                     Url = submodel.SubmodelUrl
-                }; 
-
-                // add  meta information to submodel: 
-                // JObject metaValue = new JObject
-                // {
-                //     {
-                //         StringConstants.PropertyNameMetaSubmodelSchema,
-                //         submodel._schema
-                //     },
-                //     {
-                //         StringConstants.PropertyNameMetaSubmodelUrl,
-                //         submodel.SubmodelUrl
-                //     },
-                //     {
-                //         StringConstants.PropertyNameMetaSource,
-                //         _endpointName
-                //     }
-                // };
+                };
 
                 SubmodelProperty meta = new SubmodelProperty();
                 meta.Populate(this, asset, submodel);
@@ -425,9 +409,9 @@ namespace assets2036net
             return asset;
         }
 
-        private readonly static ConcurrentDictionary<Uri, (DateTime, string)> _submodelsCache = new ConcurrentDictionary<Uri, (DateTime, string)>();
+        private readonly ConcurrentDictionary<Uri, (DateTime, string)> _submodelsCache = new ConcurrentDictionary<Uri, (DateTime, string)>();
 
-        private static string LoadTextFrom(Uri locator, bool noSslValidation = true)
+        private string LoadTextFrom(Uri locator, bool noSslValidation = true)
         {
             try
             {
@@ -493,62 +477,51 @@ namespace assets2036net
             return text;
         }
 
-        // private readonly bool _healthyCheckActive = false;
-
-        //public void Stop()
-        //{
-        //}
-
-        /**
-         * Waits until all published messages are delivered to subscribers, at least timeoutSeconds seconds
-         */
-        // public bool Wait(int timeoutSeconds = 3)
-        // {
-        //     // wait for unpublished messages to be sent
-        //     DateTime started = DateTime.Now;
-
-        //     var count = 1;
-
-        //     Func<int> numberUnpublishedMessages = () => 
-        //     {
-        //         lock (unpublishedMessagedLock)
-        //         {
-        //             return unpublishedMessages.Count;
-        //         }
-        //     }; 
-            
-        //     while (numberUnpublishedMessages() > 0 && DateTime.Now.Subtract(started) < TimeSpan.FromSeconds(timeoutSeconds))
-        //     {
-        //         Thread.Sleep(100);
-        //     }
-
-        //     return count == 0;
-        // }
+        // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
+        ~AssetMgr()
+        {
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: false);
+        }
 
         /// <summary>
         /// Stops all started tasks and disconnects from the mqtt broker. 
         /// </summary>
         public void Dispose()
         {
-           // Dispose of unmanaged resources.
-           Dispose(true);
-           // Suppress finalization.
-           GC.SuppressFinalize(this);
+            // Dispose of unmanaged resources.
+            Dispose(true);
+            // Suppress finalization.
+            GC.SuppressFinalize(this);
         }
 
-        bool _disposed = false;
+        bool disposedValue = false;
 
         protected virtual void Dispose(bool disposing)
         {
-           if (_disposed)
-               return;
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    // TODO: dispose managed state (managed objects)
+                }
 
-           if (disposing)
-           {
-                _stopHealthyCallbackTask(); 
-           }
+                // TODO: free unmanaged resources (unmanaged objects) and override finalizer
+                // TODO: set large fields to null
+                _stopHealthyCallbackTask();
+                // if (EndpointAsset != null && EndpointAsset.Asset != null)
+                // {
+                //     EndpointAsset.Asset.RemoveAllSubmodelsPropertiesFromBroker(); 
+                // }
 
-           _disposed = true;
+                if (_mqttClient != null && _mqttClient.IsConnected)
+                {
+                    _mqttClient.DisconnectAsync().Wait(); 
+                    _mqttClient = null; 
+                }
+
+                disposedValue = true;
+            }
         }
 
         internal IMqttClient _mqttClient;
@@ -570,8 +543,8 @@ namespace assets2036net
             var factory = new MqttFactory();
             _mqttClient = factory.CreateMqttClient();
 
-            _mqttClient.ApplicationMessageReceivedAsync += this.HandleApplicationMessageReceivedAsync; 
-            _mqttClient.DisconnectedAsync += this.HandleDisconnectedAsync; 
+            _mqttClient.ApplicationMessageReceivedAsync += this.HandleApplicationMessageReceivedAsync;
+            _mqttClient.DisconnectedAsync += this.HandleDisconnectedAsync;
 
             var messageBuilder = new MqttApplicationMessageBuilder();
 
@@ -601,7 +574,7 @@ namespace assets2036net
             var options = optionsBuilder.Build(); 
 
             log.InfoFormat("{0} connects to {1}:{2}", _mqttClientId, BrokerHost, BrokerPort);
-            _mqttClient.ConnectAsync(options, CancellationToken.None).Wait(); 
+            _mqttClient.ConnectAsync(options, CancellationToken.None).Wait();
         }
 
         internal void Publish(string topic, string text, bool retain)
@@ -620,6 +593,7 @@ namespace assets2036net
                             .Build();
 
                         _mqttClient.PublishAsync(message); 
+                        // Console.WriteLine($"Pub: {topic} {text} {retain}"); 
                     }
                     else
                     {
@@ -630,6 +604,7 @@ namespace assets2036net
                             .Build();
 
                         _mqttClient.PublishAsync(message); 
+                        // Console.WriteLine($"Clean: {topic} {retain}"); 
                     }
                 }
             }
@@ -662,8 +637,6 @@ namespace assets2036net
 
         private readonly object unpublishedMessagedLock = new object();
 
-        private readonly ConcurrentDictionary<ushort, byte> unpublishedMessages = new ConcurrentDictionary<ushort, byte>();
-
         private readonly static log4net.ILog log = Config.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType.FullName);
 
         private readonly string _mqttClientId = "assets2036net_" + Guid.NewGuid().ToString();
@@ -693,11 +666,11 @@ namespace assets2036net
 
         public Task HandleDisconnectedAsync(MqttClientDisconnectedEventArgs eventArgs)
         {
-           return Task.Run(() =>
-           {
-               log.Error("MQTT connectionClosed!");
-               LostConnection?.Invoke(); 
-           }); 
+            return Task.Run(() =>
+            {
+                log.Error("MQTT connectionClosed!");
+                LostConnection?.Invoke();
+            });
         }
 
         public Task HandleApplicationMessageReceivedAsync(MqttApplicationMessageReceivedEventArgs eventArgs)
@@ -723,7 +696,12 @@ namespace assets2036net
 
                 if (eventArgs.ApplicationMessage.PayloadSegment == null)
                 {
-                    return; 
+                    return;
+                }
+
+                if (eventArgs.ApplicationMessage.PayloadSegment.Count <= 0)
+                {
+                    return;
                 }
 
                 string message = System.Text.Encoding.UTF8.GetString(eventArgs.ApplicationMessage.PayloadSegment.Array);
@@ -734,7 +712,7 @@ namespace assets2036net
 
                 if (eventArgs.ApplicationMessage.Topic.EndsWith(StringConstants.StringConstant_REQ))
                 {
-                    var req = JsonSerializer.Deserialize<SubmodelOperationRequest>(message); 
+                    var req = JsonSerializer.Deserialize<SubmodelOperationRequest>(message);
 
                     var assetsBag = _ownerAssets[topic.GetFullAssetName()];
 
@@ -765,7 +743,7 @@ namespace assets2036net
                             var submodel = asset.Submodel(topic.GetSubmodelName());
                             var operation = submodel.Operation(topic.GetElementName());
 
-                            var respObj = JsonSerializer.Deserialize<SubmodelOperationResponse>(message); 
+                            var respObj = JsonSerializer.Deserialize<SubmodelOperationResponse>(message);
                             respObj.Populate(this, asset, submodel);
                             //                            respObj.Name = topic.GetElementName();
                             respObj.Operation = operation;
@@ -794,13 +772,13 @@ namespace assets2036net
 
                             if (property != null)
                             {
-                                object messageObj = JsonSerializer.Deserialize<object>(message); 
+                                object messageObj = JsonSerializer.Deserialize<object>(message);
                                 property.updateLocalValue(messageObj);
                             }
                             else if (submodelEvent != null)
                             {
                                 // SubmodelEventMessage emission = JsonConvert.DeserializeObject<SubmodelEventMessage>(message);
-                                var emission = JsonSerializer.Deserialize<SubmodelEventMessage>(message); 
+                                var emission = JsonSerializer.Deserialize<SubmodelEventMessage>(message);
                                 emission.Populate(this, asset, submodel);
 
                                 submodelEvent.EmitEmission(emission);

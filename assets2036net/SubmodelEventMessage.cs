@@ -13,7 +13,7 @@ namespace assets2036net
     /// <summary>
     /// Class represents the payload of an event. Used for payload JSON serialization. 
     /// </summary>
-    public class SubmodelEventMessage : CommElementBase
+    public class SubmodelEventMessage : ParameterizedMessage
     {
         /// <summary>
         /// The event's timestamp. 
@@ -33,11 +33,5 @@ namespace assets2036net
                 Timestamp = DateTime.Parse(value); 
             }
         }
-
-        /// <summary>
-        /// The event's parameter values
-        /// </summary>
-        [JsonPropertyName("params")]
-        public Dictionary<string, object> Parameters{ get; set; }
     }
 }

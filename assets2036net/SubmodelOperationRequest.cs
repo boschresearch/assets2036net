@@ -18,19 +18,13 @@ namespace assets2036net
     /// or submodel, all parameters to an operation will be encapsulated inside an instance of 
     /// SubmodelOperationRequest. 
     /// </summary>
-    public class SubmodelOperationRequest : CommElementBase
+    public class SubmodelOperationRequest : ParameterizedMessage
     {
         /// <summary>
         /// The unique request id for an operation call. Used to map request and answer on the client side. 
         /// </summary>
         [JsonPropertyName("req_id")]
         public string RequestId { get; set; }
-
-        /// <summary>
-        /// a dictionary containig the request's corresponding parameters. 
-        /// </summary>
-        [JsonPropertyName("params")]
-        public Dictionary<string, object> Parameters { get; set; }
 
         /// <summary>
         /// Referehnce to the submodel operation which will be used to handle this request. 
@@ -90,121 +84,6 @@ namespace assets2036net
             {
                 log.Warn($"deserialization of paramater named {paramName} failed - returning null value"); 
                 return null; 
-            }
-        }
-
-        public int GetParameterInt32(string paramName) 
-        {
-            if (!Parameters.ContainsKey(paramName))
-            {
-                log.Warn($"paramater named {paramName} not found - returning default value"); 
-                return 0; 
-            }
-
-            try
-            {
-                return ((JsonElement)Parameters[paramName]).GetInt32(); 
-            }
-            catch
-            {
-                log.Warn($"deserialization of paramater named {paramName} failed - returning default value"); 
-                return 0; 
-            }
-        }
-
-        public long GetParameterInt64(string paramName) 
-        {
-            if (!Parameters.ContainsKey(paramName))
-            {
-                log.Warn($"paramater named {paramName} not found - returning default value"); 
-                return (Int64)0; 
-            }
-
-            try
-            {
-                return ((JsonElement)Parameters[paramName]).GetInt64(); 
-            }
-            catch
-            {
-                log.Warn($"deserialization of paramater named {paramName} failed - returning default value"); 
-                return (long)0; 
-            }
-        }
-
-        public double GetParameterDouble(string paramName) 
-        {
-            if (!Parameters.ContainsKey(paramName))
-            {
-                log.Warn($"paramater named {paramName} not found - returning default value"); 
-                return (double)0.0; 
-            }
-
-            try
-            {
-                return ((JsonElement)Parameters[paramName]).GetDouble(); 
-            }
-            catch
-            {
-                log.Warn($"deserialization of paramater named {paramName} failed - returning default value"); 
-                return (double)0.0; 
-            }
-        }
-
-        public float GetParameterFloat(string paramName) 
-        {
-            if (!Parameters.ContainsKey(paramName))
-            {
-                log.Warn($"paramater named {paramName} not found - returning null value"); 
-                return 0.0f; 
-            }
-
-            try
-            {
-                return (float)((JsonElement)Parameters[paramName]).GetDouble(); 
-            }
-            catch
-            {
-                log.Warn($"deserialization of paramater named {paramName} failed - returning default value"); 
-                return 0.0f; 
-            }
-        }
-
-        public bool GetParameterBool(string paramName) 
-        {
-            if (!Parameters.ContainsKey(paramName))
-            {
-                log.Warn($"paramater named {paramName} not found - returning default value"); 
-                return false; 
-            }
-
-            try
-            {
-                return ((JsonElement)Parameters[paramName]).GetBoolean(); 
-            }
-            catch
-            {
-                log.Warn($"deserialization of paramater named {paramName} failed - returning default value"); 
-                return false; 
-            }
-        }
-
-        public T GetParameterValueOrDefault<T>(string parameterKey, T defaultValue = default)
-        {
-            if (!Parameters.ContainsKey(parameterKey))
-            {
-                return defaultValue; 
-            }
-
-            var value = (JsonElement)Parameters[parameterKey]; 
-
-            try
-            {
-                var res = value.Deserialize<T>(); 
-                return res; 
-            }
-            catch (Exception)
-            {
-                return defaultValue; 
             }
         }
 

@@ -67,12 +67,13 @@ namespace assets2036net
         /// Internally, the assetMgr will create this endpoint asset automatically when it is used 
         /// to create the first asset. If you only create AssetProxies using this AssetMgr, you can 
         /// ignore this param.</param>
-        public AssetMgr(string host, int port, string @namespace, string endpointName)
+        public AssetMgr(string host, int port, string @namespace, string endpointName, string knownSessionId = "")
         {
             BrokerHost = host;
             BrokerPort = port;
             Namespace = @namespace;
             _endpointName = endpointName;
+            _mqttKnownSessionId = knownSessionId; 
 
             _consumerAssets = new ConcurrentDictionary<string, ConcurrentBag<Asset>>();
             _ownerAssets = new ConcurrentDictionary<string, ConcurrentBag<Asset>>();
@@ -107,6 +108,8 @@ namespace assets2036net
         
         private CancellationTokenSource _healthyCallbackTaskCTS = null; 
         private Task _healthyCallbackTask = null; 
+
+        private string _mqttKnownSessionId = ""; 
 
         /// <summary>
         /// Set a callback which will be called periodically to check the healthy status of 
@@ -556,10 +559,8 @@ namespace assets2036net
 
             var messageBuilder = new MqttApplicationMessageBuilder();
 
-            var options = new MqttClientOptionsBuilder()
-                .WithClientId(_mqttClientId)
+            var optionsBuilder = new MqttClientOptionsBuilder()
                 .WithTcpServer(BrokerHost, BrokerPort)
-                .WithCleanSession()
                 .WithWillMessage(
                     messageBuilder
                     .WithTopic(CommElementBase.BuildTopic(
@@ -570,8 +571,23 @@ namespace assets2036net
                     .WithPayload(JsonConvert.False)
                     .Build());
 
+            if (_mqttKnownSessionId != "")
+            {
+                optionsBuilder = optionsBuilder
+                    .WithCleanSession(false)
+                    .WithClientId(_mqttKnownSessionId); 
+            }
+            else
+            {
+                optionsBuilder = optionsBuilder
+                    .WithCleanSession(true)
+                    .WithClientId(_mqttClientId); 
+            }
+
+            var options = optionsBuilder.Build(); 
+
             log.InfoFormat("{0} connects to {1}:{2}", _mqttClientId, BrokerHost, BrokerPort);
-            _mqttClient.ConnectAsync(options.Build(), CancellationToken.None).Wait(); 
+            _mqttClient.ConnectAsync(options, CancellationToken.None).Wait(); 
         }
 
         internal void Publish(string topic, string text, bool retain)

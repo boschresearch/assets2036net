@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Text.Json;
 using System.Threading;
 using Xunit;
 
@@ -31,13 +32,13 @@ namespace assets2036net.unittests
             // bind local eventlistener to event
             assetConsumer.Submodel("events").Event("anevent").Emission += this.handleEvent; 
 
-            this.a = null;
-            this.b = null;
-            this.c = null;
+            this._a = null;
+            this._b = null;
+            this._c = null;
 
             object a = "Parameter_a";
             object b = "Parameter_b";
-            object c = new Newtonsoft.Json.Linq.JObject()
+            object c = new Dictionary<string, object>
             {
                 {"eins", 1 },
                 {"zwei", 2 }, 
@@ -58,35 +59,35 @@ namespace assets2036net.unittests
 
             Assert.True(waitForCondition(() =>
             {
-                return a.Equals(this.a);
+                return a.Equals(this._a);
             }, Settings.WaitTime));
 
             Assert.True(waitForCondition(() =>
             {
-                return b.Equals(this.b);
+                return b.Equals(this._b);
             }, Settings.WaitTime));
 
             Assert.True(waitForCondition(() =>
             {
-                if (this.c == null)
+                if (this._c == null)
                 {
                     return false; 
                 }
 
-                return c.ToString().Equals(this.c.ToString());
+                return c.ToString().Equals(this._c.ToString());
             }, Settings.WaitTime));
 
         }
 
-        object a = null;
-        object b = null;
-        object c = null;
+        object _a = null;
+        object _b = null;
+        object _c = null;
 
         private void handleEvent(SubmodelEventMessage emission)
         {
-            this.a = emission.Parameters["aaa"];
-            this.b = emission.Parameters["bbb"];
-            this.c = emission.Parameters["objectparameter"];
+            this._a = ((JsonElement)emission.Parameters["aaa"]).GetString();
+            this._b = ((JsonElement)emission.Parameters["bbb"]).GetString();
+            this._c = ((JsonElement)emission.Parameters["objectparameter"]).Deserialize<Dictionary<string, object>>();
         }
     }
 }

@@ -3,10 +3,10 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -23,13 +23,12 @@ namespace assets2036net
     ///     remote asset via its proxy. </item> 
     /// </list>
     /// </summary>
-    [JsonObject(MemberSerialization.OptIn)]
     public class SubmodelOperation : SubmodelElement
     {
         /// <summary>
         /// The operation's parameters
         /// </summary>
-        [JsonProperty("parameters")]
+        [JsonPropertyName("parameters")]
         public Dictionary<string, Parameter> Parameters
         {
             get
@@ -223,6 +222,7 @@ namespace assets2036net
         /// When implementing the submodel provider, set Callback to define the method which will be called, 
         /// when somebody calls thus submodel operation remotely. 
         /// </summary>
+        [JsonIgnore]
         public Func<SubmodelOperationRequest, SubmodelOperationResponse> Callback { get; set; }
 
         private readonly static log4net.ILog log = Config.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType.FullName);

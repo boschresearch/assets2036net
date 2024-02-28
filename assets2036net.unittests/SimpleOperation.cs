@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Text.Json;
 using System.Threading;
 using Xunit;
 
@@ -82,13 +83,16 @@ namespace assets2036net.unittests
             // check result: 
             Assert.Equal(
                 2.5 + 7.7,
-                Convert.ToDouble(response));
+                ((JsonElement)response).GetDouble()); 
         }
 
         private SubmodelOperationResponse callBackAdd(SubmodelOperationRequest req)
         {
-            double num1 = Convert.ToDouble(req.Parameters["aaa"]);
-            double num2 = Convert.ToDouble(req.Parameters["bbb"]);
+            // double num1 = Convert.ToDouble(req.Parameters["aaa"]);
+            // double num2 = Convert.ToDouble(req.Parameters["bbb"]);
+
+            double num1 = ((JsonElement)req.Parameters["aaa"]).GetDouble(); 
+            double num2 = ((JsonElement)req.Parameters["bbb"]).GetDouble(); 
 
             var response = req.CreateResponseObj();
             response.Value = num1 + num2;

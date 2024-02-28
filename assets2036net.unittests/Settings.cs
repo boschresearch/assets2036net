@@ -11,14 +11,15 @@ namespace assets2036net.unittests
 {
     class Settings
     {
-        public static string BrokerHost = "broker.hivemq.com";
+        // public static string BrokerHost = "broker.hivemq.com";
+        public static string BrokerHost = "backend.fac6310.btia.emea.ide.rb"; 
         // public static string BrokerHost = "test.mosquitto.org";
         // public static string BrokerHost = "192.168.100.3";
         public static int BrokerPort = 1883;
-        public static string EndpointName = "assets2036net_tests"; 
+        public static string EndpointName = "assets2036nettest_endpoint"; 
 
-        public static TimeSpan WaitTime = TimeSpan.FromSeconds(500);
-        public static string RootTopic = "arena2036test";
+        public static TimeSpan WaitTime = TimeSpan.FromSeconds(3);
+        public static string RootTopic = "arena2036nettest";
 
         public static Uri GetUriToEndpointSubmodel()
         {
@@ -33,7 +34,7 @@ namespace assets2036net.unittests
 
             //return new Uri(path);
 
-            return new Uri("https://raw.githubusercontent.com/boschresearch/assets2036-submodels/master/_endpoint.json");
+            return new Uri("https://backend.fac6310.btia.emea.ide.rb/modelstore/_endpoint.json");
         }
 
     }

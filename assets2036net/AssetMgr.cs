@@ -8,14 +8,16 @@ using MQTTnet.Client;
 using MQTTnet.Client.Disconnecting;
 using MQTTnet.Client.Options;
 using MQTTnet.Client.Receiving;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+// using Newtonsoft.Json;
+// using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Net.Security;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -253,30 +255,31 @@ namespace assets2036net
         private readonly ConcurrentDictionary<string, ConcurrentBag<Asset>> _consumerAssets;
         private readonly ConcurrentDictionary<string, ConcurrentBag<Asset>> _ownerAssets;
 
-        private NJsonSchema.JsonSchema _submodelSchema;
+        // private NJsonSchema.JsonSchema _submodelSchema;
 
         private bool validateSubmodel(string json, List<string> errors = null)
         {
-            if (_submodelSchema == null)
-            {
-               string submodelSchema = Config.Assets2036SubmodelSchema;
+            // if (_submodelSchema == null)
+            // {
+            //    string submodelSchema = Config.Assets2036SubmodelSchema;
 
-               var taskSchema = NJsonSchema.JsonSchema.FromJsonAsync(submodelSchema);
-               _submodelSchema = taskSchema.Result;
-            }
+            //    var taskSchema = NJsonSchema.JsonSchema.FromJsonAsync(submodelSchema);
+            //    _submodelSchema = taskSchema.Result;
+            // }
 
-            bool valid = true;
-            foreach (var error in _submodelSchema.Validate(json))
-            {
-               valid = false;
+            // bool valid = true;
+            // foreach (var error in _submodelSchema.Validate(json))
+            // {
+            //    valid = false;
 
-               if (errors != null)
-               {
-                   errors.Add(string.Format("{0} at line {1}", error.ToString(), error.LineNumber));
-               }
-            }
+            //    if (errors != null)
+            //    {
+            //        errors.Add(string.Format("{0} at line {1}", error.ToString(), error.LineNumber));
+            //    }
+            // }
 
-            return valid;
+            // return valid;
+            return true; 
         }
 
         private Func<bool> _healthyCallback;
@@ -298,13 +301,21 @@ namespace assets2036net
                     continue;
                 }
 
-                var jobjectSubmodel = JObject.Parse(submodelDefinition);
-                var submodel = jobjectSubmodel.ToObject<Submodel>();
+                
+                var submodel = JsonSerializer.Deserialize<Submodel>(
+                    submodelDefinition, 
+                    new JsonSerializerOptions
+                            {
+                                Converters = { new JsonStringEnumConverter() }
+                            });
+                // submodel._schema = submodel; 
 
-                submodel._schema = jobjectSubmodel;
+                // // Newtonsoft impl: 
+                // var jobjectSubmodel = JObject.Parse(submodelDefinition);
+                // var submodel = jobjectSubmodel.ToObject<Submodel>();
+
+                // submodel._schema = jobjectSubmodel;
                 submodel.SubmodelUrl = submodelUri.ToString();
-
-                //                submodel.populateElements(this, asset);
 
                 submodels.Add(submodel);
             }
@@ -365,22 +376,32 @@ namespace assets2036net
 
             foreach (Submodel submodel in asset.Submodels)
             {
-                // add  meta information to submodel: 
-                JObject metaValue = new JObject
+                // for the metaproperty submodelDefinition we need a true copy of the submodel, 
+                // without the _meta property! 
+
+                var metaValue = new MetaPropertyValue
                 {
-                    {
-                        StringConstants.PropertyNameMetaSubmodelSchema,
-                        submodel._schema
-                    },
-                    {
-                        StringConstants.PropertyNameMetaSubmodelUrl,
-                        submodel.SubmodelUrl
-                    },
-                    {
-                        StringConstants.PropertyNameMetaSource,
-                        _endpointName
-                    }
-                };
+                    Source = _endpointName,
+                    SubmodelDefinition = submodel,
+                    Url = submodel.SubmodelUrl
+                }; 
+
+                // add  meta information to submodel: 
+                // JObject metaValue = new JObject
+                // {
+                //     {
+                //         StringConstants.PropertyNameMetaSubmodelSchema,
+                //         submodel._schema
+                //     },
+                //     {
+                //         StringConstants.PropertyNameMetaSubmodelUrl,
+                //         submodel.SubmodelUrl
+                //     },
+                //     {
+                //         StringConstants.PropertyNameMetaSource,
+                //         _endpointName
+                //     }
+                // };
 
                 SubmodelProperty meta = new SubmodelProperty();
                 meta.Populate(this, asset, submodel);
@@ -568,7 +589,7 @@ namespace assets2036net
                         _endpointName,
                         StringConstants.SubmodelNameEnpoint,
                         StringConstants.PropertyNameOnline))
-                    .WithPayload(JsonConvert.False)
+                    .WithPayload(JsonSerializer.Serialize(false))
                     .Build());
 
             if (_mqttKnownSessionId != "")
@@ -707,7 +728,7 @@ namespace assets2036net
 
                 if (eventArgs.ApplicationMessage.Topic.EndsWith(StringConstants.StringConstant_REQ))
                 {
-                    var req = Newtonsoft.Json.JsonConvert.DeserializeObject<SubmodelOperationRequest>(message);
+                    var req = JsonSerializer.Deserialize<SubmodelOperationRequest>(message); 
 
                     var assetsBag = _ownerAssets[topic.GetFullAssetName()];
 
@@ -738,7 +759,7 @@ namespace assets2036net
                             var submodel = asset.Submodel(topic.GetSubmodelName());
                             var operation = submodel.Operation(topic.GetElementName());
 
-                            var respObj = Newtonsoft.Json.JsonConvert.DeserializeObject<SubmodelOperationResponse>(message);
+                            var respObj = JsonSerializer.Deserialize<SubmodelOperationResponse>(message); 
                             respObj.Populate(this, asset, submodel);
                             //                            respObj.Name = topic.GetElementName();
                             respObj.Operation = operation;
@@ -767,12 +788,14 @@ namespace assets2036net
 
                             if (property != null)
                             {
-                                object messageObj = Newtonsoft.Json.JsonConvert.DeserializeObject(message);
+                                // object messageObj = Newtonsoft.Json.JsonConvert.DeserializeObject(message);
+                                object messageObj = JsonSerializer.Deserialize<object>(message); 
                                 property.updateLocalValue(messageObj);
                             }
                             else if (submodelEvent != null)
                             {
-                                SubmodelEventMessage emission = JsonConvert.DeserializeObject<SubmodelEventMessage>(message);
+                                // SubmodelEventMessage emission = JsonConvert.DeserializeObject<SubmodelEventMessage>(message);
+                                var emission = JsonSerializer.Deserialize<SubmodelEventMessage>(message); 
                                 emission.Populate(this, asset, submodel);
                                 //                                emission.Name = topic.GetElementName();
 

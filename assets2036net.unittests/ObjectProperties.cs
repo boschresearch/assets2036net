@@ -36,16 +36,16 @@ namespace assets2036net.unittests
             Asset assetOwner = mgr.CreateAsset(Settings.RootTopic, Settings.EndpointName, uri);
             Asset assetConsumer = mgr.CreateAssetProxy(Settings.RootTopic, Settings.EndpointName, uri);
 
-            var complexValue = new JObject()
+            var complexValue = new Dictionary<string, object>()
             {
                 {"name", "Testname" },
-                {"x", "77.77" },
-                {"y", "99.99" },
-                {"encaps_object", new JObject()
+                {"x", 77.77},
+                {"y", 99.99},
+                {"encaps_object", new Dictionary<string, object>()
                     {
                         {"name", "TestnameEncaps" },
-                        {"x", "55.55" },
-                        {"y", "44.44" },
+                        {"x", 55.55},
+                        {"y", 44.44},
                     }
                 }
             };
@@ -65,8 +65,16 @@ namespace assets2036net.unittests
             {
                 if (assetConsumer.Submodel("properties").Property("an_object").Value == null)
                     return false; 
+                Thread.Sleep(300); 
 
-                return complexValue.ToString().Equals(assetConsumer.Submodel("properties").Property("an_object").Value.ToString()); 
+                // Console.WriteLine(
+                //     complexValue.ToString()); 
+                // Console.WriteLine(
+                //     assetConsumer.Submodel("properties").Property("an_object").GetValueAs<Dictionary<string, object>>().ToString()); 
+
+                return complexValue.ToString().Equals(
+                    assetConsumer.Submodel("properties").Property("an_object").GetValueAs<Dictionary<string, object>>().ToString()); 
+
             }, Settings.WaitTime));
 
             //Assert.Equal(

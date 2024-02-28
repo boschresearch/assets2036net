@@ -82,8 +82,8 @@ namespace assets2036net
         internal AssetEndpoint(Asset asset)
         {
             _asset = asset;
-            _asset.Submodel(
-                StringConstants.SubmodelNameEnpoint).Operation(StringConstants.OperationNamePing).Callback = this.ping; 
+            // _asset.Submodel(
+            //     StringConstants.SubmodelNameEnpoint).Operation(StringConstants.OperationNamePing).Callback = this.ping; 
         }
 
         internal SubmodelOperationResponse ping(SubmodelOperationRequest req)

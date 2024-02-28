@@ -3,7 +3,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 
 namespace assets2036net
 {
@@ -12,19 +12,18 @@ namespace assets2036net
     /// for JSON serialization of submodel descriptions. Usually not needed when implementing 
     /// submodel providers or proxies. 
     /// </summary>
-    [JsonObject(MemberSerialization.OptIn)]
     public class Parameter
     {
         /// <summary>
         /// The parameter type. Allowed are the JSON schema types. 
         /// </summary>
-        [JsonProperty("type")]
+        [JsonPropertyName("type")]
         public string Type { get; set; }
 
         /// <summary>
         /// Name of the parameter. 
         /// </summary>
-        [JsonProperty("name")]
+        [JsonPropertyName("name")]
         public string Name { get; set; }
     }
 }

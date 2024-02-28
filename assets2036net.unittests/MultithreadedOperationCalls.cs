@@ -6,6 +6,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text.Json;
 using System.Threading;
 using Xunit;
 
@@ -52,11 +53,11 @@ namespace assets2036net.unittests
                 {
                     Assert.Equal(
                         (double)i * i,
-                        assetConsumer1.Submodel("math").Operation("square").Invoke(new Dictionary<string, object>()
+                        ((JsonElement)assetConsumer1.Submodel("math").Operation("square").Invoke(new Dictionary<string, object>()
                         {
                             {"x", i }
                         }, 
-                        Settings.WaitTime));
+                        Settings.WaitTime)).GetDouble());
 
                     //Thread.Sleep(new Random().Next(0, 5));
                 }
@@ -69,11 +70,11 @@ namespace assets2036net.unittests
                 {
                     Assert.Equal(
                         (double)Math.Sqrt(i),
-                        assetConsumer1.Submodel("math").Operation("sqrt").Invoke(new Dictionary<string, object>()
+                        ((JsonElement)assetConsumer1.Submodel("math").Operation("sqrt").Invoke(new Dictionary<string, object>()
                         {
                             {"x", i }
                         }, 
-                        Settings.WaitTime));
+                        Settings.WaitTime)).GetDouble());
 
                     //Thread.Sleep(new Random().Next(0, 5));
                 }
@@ -86,13 +87,13 @@ namespace assets2036net.unittests
                 {
                     Assert.Equal(
                         (double)Math.Sqrt(i),
-                        assetConsumer1.Submodel("math").Operation("sqrt").Invoke(new Dictionary<string, object>()
-                        {
-                            {"x", i }
-                        },
-                        Settings.WaitTime));
+                        ((JsonElement)assetConsumer1.Submodel("math").Operation("sqrt").Invoke(new Dictionary<string, object>()
+                            {
+                                {"x", i }
+                            }, 
+                            Settings.WaitTime)).GetDouble());
 
-                    //Thread.Sleep(new Random().Next(0, 5));
+                    Thread.Sleep(new Random().Next(0, 5));
                 }
             });
             t22.Start();
@@ -101,13 +102,13 @@ namespace assets2036net.unittests
             {
                 Assert.Equal(
                     Math.Sin(i),
-                    assetConsumer1.Submodel("math").Operation("sin").Invoke(new Dictionary<string, object>()
+                    ((JsonElement)assetConsumer1.Submodel("math").Operation("sin").Invoke(new Dictionary<string, object>()
                     {
                         {"x", i }
-                    },
-                    Settings.WaitTime));
+                    }, 
+                    Settings.WaitTime)).GetDouble());
 
-                //Thread.Sleep(new Random().Next(0, 5));
+                Thread.Sleep(new Random().Next(0, 5));
             }
 
             t1.Join();
@@ -120,7 +121,7 @@ namespace assets2036net.unittests
 
         private SubmodelOperationResponse square(SubmodelOperationRequest req)
         {
-            double a = Convert.ToDouble(req.Parameters["x"]);
+            double a = ((JsonElement)(req.Parameters["x"])).GetDouble();
             var resp = req.CreateResponseObj();
             resp.Value = a * a;
 
@@ -128,7 +129,7 @@ namespace assets2036net.unittests
         }
         private SubmodelOperationResponse sqrt(SubmodelOperationRequest req)
         {
-            double a = Convert.ToDouble(req.Parameters["x"]);
+            double a = ((JsonElement)(req.Parameters["x"])).GetDouble();
             var resp = req.CreateResponseObj();
             resp.Value = Math.Sqrt(a);
 
@@ -136,7 +137,7 @@ namespace assets2036net.unittests
         }
         private SubmodelOperationResponse sin(SubmodelOperationRequest req)
         {
-            double a = Convert.ToDouble(req.Parameters["x"]);
+            double a = ((JsonElement)(req.Parameters["x"])).GetDouble();
             var resp = req.CreateResponseObj();
             resp.Value = Math.Sin(a);
 

@@ -11,6 +11,9 @@ using MQTTnet.Client.Receiving;
 using MQTTnet.Client.Subscribing;
 using System;
 using System.Collections.Generic;
+using System.Runtime.Serialization.Json;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -73,7 +76,10 @@ namespace assets2036net
                     var topic = eventArgs.ApplicationMessage.Topic;
 
                     string message = System.Text.Encoding.UTF8.GetString(eventArgs.ApplicationMessage.Payload);
-                    var metaTag = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, object>>(message);
+                    // var metaTag = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, object>>(message);
+                    var metaTag = System.Text.Json.JsonSerializer.Deserialize<MetaPropertyValue>(
+                        message, 
+                        Tools.JsonSerializerOptions);
 
                     if (metaTag == null)
                     {
@@ -82,15 +88,18 @@ namespace assets2036net
 
                     try
                     {
-                        if (!metaTag.TryGetValue(StringConstants.PropertyNameMetaSubmodelSchema, out object oSchema))
+                        if (metaTag.SubmodelDefinition == null)
+                        // if (!metaTag.TryGetValue(StringConstants.PropertyNameMetaSubmodelSchema, out object oSchema))
                         {
                             return Task.CompletedTask;
                         }
 
-                        var stringSchema = Newtonsoft.Json.JsonConvert.SerializeObject(oSchema);
-                        var schema = Newtonsoft.Json.JsonConvert.DeserializeObject<Submodel>(stringSchema);
-                        schema.SubmodelUrl = metaTag["submodel_url"] as string;
-                        submodels.Add(schema.Name, schema);
+                        var stringSchema = JsonSerializer.Serialize(
+                            metaTag.SubmodelDefinition, 
+                            Tools.JsonSerializerOptions);
+                        // var schema = Newtonsoft.Json.JsonConvert.DeserializeObject<Submodel>(stringSchema);
+                        // schema.SubmodelUrl = metaTag["submodel_url"] as string;
+                        submodels.Add(metaTag.SubmodelDefinition.Name, metaTag.SubmodelDefinition);
                     }
                     catch (Exception exc)
                     {

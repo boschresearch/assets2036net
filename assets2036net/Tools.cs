@@ -9,6 +9,8 @@ using MQTTnet.Client.Options;
 using MQTTnet.Client.Subscribing;
 using System;
 using System.Collections.Generic;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -16,6 +18,12 @@ namespace assets2036net
 {
     public static class Tools
     {
+        public static JsonSerializerOptions JsonSerializerOptions = new JsonSerializerOptions()
+        {
+            Converters = { new JsonStringEnumConverter() }, 
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+        }; 
+
         /// <summary>
         /// Helper method to erase all retained messages produced by a specific asset. 
         /// </summary>

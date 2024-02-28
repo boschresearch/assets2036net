@@ -3,10 +3,11 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.Text.Json;
+using System.Text.Json.Nodes;
+using System.Text.Json.Serialization;
 
 namespace assets2036net
 {
@@ -22,7 +23,6 @@ namespace assets2036net
     /// Listen to the event <seealso cref="ValueModified"/> on the proxy side to get informed, if 
     /// the property valued changes. 
     /// </summary>
-    [JsonObject(MemberSerialization.OptIn)]
     public class SubmodelProperty : SubmodelElement
     {
         /// <summary>
@@ -45,7 +45,7 @@ namespace assets2036net
         /// <summary>
         /// The property's datatype. <seealso cref="ValueType"/>
         /// </summary>
-        [JsonProperty("type")]
+        [JsonPropertyName("type")]
         public ValueType Type { get; set; }
 
         internal void updateLocalValue(object newValue)
@@ -78,6 +78,7 @@ namespace assets2036net
         /// </list>
         /// </summary>
         /// If you expect some special object or array type, use <seealso cref="GetValueAs{T}"/>. 
+        [JsonIgnore]
         public object Value
         {
             get
@@ -112,10 +113,13 @@ namespace assets2036net
             if (Asset.Initialized())
             {
                 // compare serialized values to check if publish
-                string json = JsonConvert.SerializeObject(_value);
+                string json = JsonSerializer.Serialize(
+                    _value, 
+                     Tools.JsonSerializerOptions);
+                     
                 if (json != _latestPublishedValueJson)
                 {
-                    Asset.publish(Topic, JsonConvert.SerializeObject(_value), true);
+                    Asset.publish(Topic, json, true);
                     _latestPublishedValueJson = json;
                 }
             }
@@ -124,74 +128,134 @@ namespace assets2036net
         /// <summary>
         /// returns the current property value as string
         /// </summary>
+        [JsonIgnore]
         public string ValueString
         {
             get
             {
-                return Convert.ToString(Value);
+                if (Value == null)
+                {
+                    return null; 
+                }
+                else if (Value.GetType() == typeof(string))
+                {
+                    return (string)Value; 
+                }
+                else
+                {
+                    return ((JsonElement)Value).GetString(); 
+                }
             }
         }
         /// <summary>
         /// returns the current property value as int
         /// </summary>
+        [JsonIgnore]
         public int ValueInt
         {
             get
             {
-                return Convert.ToInt32(Value);
+                if (Value == null)
+                {
+                    return (int)0; 
+                }
+                else if (Value.GetType() == typeof(int))
+                {
+                    return (int)Value; 
+                }
+                else
+                {
+                    return (int)((JsonElement)Value).GetInt32(); 
+                }
             }
         }
         /// <summary>
         /// returns the current property value as double
         /// </summary>
+        [JsonIgnore]
         public double ValueDouble
         {
             get
             {
-                return Convert.ToDouble(Value);
+                if (Value == null)
+                {
+                    return 0.0f; 
+                }
+                else if (Value.GetType() == typeof(double))
+                {
+                    return (double)Value; 
+                }
+                else
+                {
+                    return (double)((JsonElement)Value).GetDouble(); 
+                }
             }
         }
         /// <summary>
         /// returns the current property value as float
         /// </summary>
+        [JsonIgnore]
         public float ValueFloat
         {
             get
             {
-                return Convert.ToSingle(Value);
+                if (Value == null)
+                {
+                    return 0.0f; 
+                }
+                else if (Value.GetType() == typeof(float))
+                {
+                    return (float)Value; 
+                }
+                else
+                {
+                    return (float)((JsonElement)Value).GetDouble(); 
+                }
             }
         }
 
         /// <summary>
         /// returns the current property value as boolean
         /// </summary>
+        [JsonIgnore]
         public bool ValueBool
         {
             get
             {
-                return Convert.ToBoolean(Value);
+                if (Value == null)
+                {
+                    return false; 
+                }
+                else if (Value.GetType() == typeof(bool))
+                {
+                    return (bool)Value; 
+                }
+                else 
+                {
+                    return ((JsonElement)Value).GetBoolean(); 
+                }
             }
         }
 
         /// <summary>
         /// returns the current property value as generic type T. 
-        /// Implemented as JsonConvert.PopulateObject(ValueObject.ToString(), result);
+        /// implemented: JsonSerializer.Deserialize<T>(JsonSerializer.ValueObject.ToString()); 
         /// </summary>
         public T GetValueAs<T>() where T : new()
         {
-            T result = new T();
-            JsonConvert.PopulateObject(ValueObject.ToString(), result);
-            return result;
+            return JsonSerializer.Deserialize<T>(JsonSerializer.Serialize(Value)); 
         }
 
         /// <summary>
-        /// returns the current property value as <seealso cref="JObject"/>
+        /// returns the current property value as Dictionary<string, object>
         /// </summary>
-        public JObject ValueObject
+        [JsonIgnore]
+        public Dictionary<string, object> ValueObject
         {
             get
             {
-                return Value as JObject;
+                return JsonSerializer.Deserialize<Dictionary<string, object>>(
+                    JsonSerializer.Serialize(Value)); 
             }
         }
 

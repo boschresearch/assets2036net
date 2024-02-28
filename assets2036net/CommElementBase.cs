@@ -3,6 +3,8 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
+using System.Text.Json.Serialization;
+
 namespace assets2036net
 {
     /// <summary>
@@ -14,16 +16,19 @@ namespace assets2036net
         /// <summary>
         /// The related AssetMgr instance. 
         /// </summary>
+        [JsonIgnore]
         public AssetMgr AssetMgr { get; internal set; }
 
         /// <summary>
         /// The related Asset instance. 
         /// </summary>
+        [JsonIgnore]
         public Asset Asset { get; internal set; }
 
         /// <summary>
         /// The related Submodel instance. 
         /// </summary>
+        [JsonIgnore]
         public Submodel Submodel { get; internal set; }
 
         internal virtual void Populate(AssetMgr mgr, Asset asset, Submodel submodel)

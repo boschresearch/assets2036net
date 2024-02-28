@@ -9,6 +9,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Nodes;
 using System.Threading;
 using Xunit;
 
@@ -41,20 +43,20 @@ namespace assets2036net.unittests
                 TimeSpan.FromSeconds(5));
 
             // check result: 
-            JObject res = response as JObject;
+            JsonElement res = (JsonElement)response;
 
             Assert.Equal(
                 "A",
-                res["first_letter"]);
+                res.GetProperty("first_letter").GetString());
 
             Assert.Equal(
                 "Z",
-                res["last_letter"]);
+                res.GetProperty("last_letter").GetString());
         }
 
         private SubmodelOperationResponse callBackSplitString(SubmodelOperationRequest req)
         {
-            string param = req.Parameters["aaa"] as string;
+            string param = ((JsonElement)req.Parameters["aaa"]).GetString();
             var result = new Dictionary<string, object>()
             {
                 {"first_letter", param.Substring(0,1)},
@@ -84,7 +86,7 @@ namespace assets2036net.unittests
             // bind local operation to asset operation
             assetOwner.Submodel("object_operation").Operation("getfirstparam").Callback = (SubmodelOperationRequest req) =>
             {
-                string result = (req.Parameters["tuple"] as JObject)["first"].ToString();
+                string result = ((JsonElement)req.Parameters["tuple"]).GetProperty("first").GetString(); 
 
                 var response = req.CreateResponseObj();
                 response.Value = result;
@@ -108,7 +110,7 @@ namespace assets2036net.unittests
                 TimeSpan.FromSeconds(5));
 
             // check result: 
-            string res = response as string;
+            string res = ((JsonElement)response).GetString(); 
 
             Assert.Equal(
                 testValue,
@@ -161,9 +163,12 @@ namespace assets2036net.unittests
                 new Dictionary<string, object>(), 
                 TimeSpan.FromSeconds(5));
 
-            // check result: 
-            JObject joPapa = response as JObject;
-            Person papa = joPapa.ToObject<Person>(); 
+            var je = (JsonElement)response; 
+            var papa = je.Deserialize<Person>(); 
+
+            // // check result: 
+            // JObject joPapa = response as JObject;
+            // Person papa = joPapa.ToObject<Person>(); 
 
             Assert.Equal(
                 2, 
@@ -190,9 +195,9 @@ namespace assets2036net.unittests
 
                 double sum = 0.0;
                 var values = req.Parameters["tuple"];
-                foreach (var d in values as JArray)
+                foreach (var d in ((JsonElement)values).EnumerateArray())
                 {
-                    sum += Convert.ToDouble(d);
+                    sum += ((JsonElement)d).GetDouble();
                 }
                 response.Value = sum;
                 return response;
@@ -208,7 +213,7 @@ namespace assets2036net.unittests
                 TimeSpan.FromSeconds(5));
 
             // check result: 
-            double res = Convert.ToDouble(response);
+            double res = ((JsonElement)response).GetDouble(); 
 
             Assert.Equal(
                 26.5,
@@ -242,17 +247,16 @@ namespace assets2036net.unittests
             }; 
 
             var result = assetConsumer.Submodel("object_operation").Operation("arrayoperation").Invoke(new Dictionary<string, object>());
-            double[] native = ((JArray)result).ToObject<double[]>();
 
-            Assert.Equal(5, native.Length);
-            Assert.Equal(2.0, native[2]);
+            Assert.Equal(5, ((JsonElement)result).GetArrayLength());
+            Assert.Equal(2.0, ((JsonElement)result)[2].GetInt32()); 
         }
 
         class Person
         {
-            public int age;
-            public string name;
-            public List<Person> kids; 
+            public int age {get;set;}
+            public string name{get;set;}
+            public List<Person> kids{get;set;}
         };
     }
 }

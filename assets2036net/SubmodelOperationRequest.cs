@@ -3,10 +3,11 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace assets2036net
 {
@@ -16,24 +17,24 @@ namespace assets2036net
     /// or submodel, all parameters to an operation will be encapsulated inside an instance of 
     /// SubmodelOperationRequest. 
     /// </summary>
-    [JsonObject(MemberSerialization.OptIn)] 
     public class SubmodelOperationRequest : CommElementBase
     {
         /// <summary>
         /// The unique request id for an operation call. Used to map request and answer on the client side. 
         /// </summary>
-        [JsonProperty("req_id")]
+        [JsonPropertyName("req_id")]
         public string RequestId { get; set; }
 
         /// <summary>
         /// a dictionary containig the request's corresponding parameters. 
         /// </summary>
-        [JsonProperty("params")]
+        [JsonPropertyName("params")]
         public Dictionary<string, object> Parameters { get; set; }
 
         /// <summary>
         /// Referehnce to the submodel operation which will be used to handle this request. 
         /// </summary>
+        [JsonIgnore]
         public SubmodelOperation Operation { get; set; }
 
         /// <summary>
@@ -59,7 +60,7 @@ namespace assets2036net
 
         private readonly static log4net.ILog log = Config.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType.FullName);
 
-        internal SubmodelOperationRequest()
+        public SubmodelOperationRequest()
         {
             Parameters = new Dictionary<string, object>(); 
         }
@@ -142,7 +143,7 @@ namespace assets2036net
 
         internal void Publish()
         {
-            string message = JsonConvert.SerializeObject(this);
+            string message = JsonSerializer.Serialize(this,  Tools.JsonSerializerOptions);
 
             var topic = BuildTopic(Operation.Topic, StringConstants.StringConstant_REQ); 
             log.DebugFormat("Send: {0} @ {1}", message, topic);

@@ -3,10 +3,6 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-<<<<<<< HEAD
-using Newtonsoft.Json;
-=======
->>>>>>> 01837e2 (Unittests laufen durch)
 using System;
 using System.Collections.Generic;
 using System.Text.Json;

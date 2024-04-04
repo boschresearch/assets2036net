@@ -26,6 +26,8 @@ namespace assets2036net.unittests
         [Fact]
         public void ConcurrentCustomers()
         {
+            
+
             string location = this.GetType().Assembly.Location;
             location = Path.GetDirectoryName(location);
             location = Path.Combine(location, "resources/math.json");
@@ -100,7 +102,7 @@ namespace assets2036net.unittests
                         sqrt); 
 
 
-                    Thread.Sleep(new Random().Next(0, 5));
+                    // Thread.Sleep(new Random().Next(0, 5));
                 }
             });
             t22.Start();
@@ -118,7 +120,7 @@ namespace assets2036net.unittests
                         sin); 
 
 
-                Thread.Sleep(new Random().Next(0, 5));
+                // Thread.Sleep(new Random().Next(0, 5));
             }
 
             t1.Join();

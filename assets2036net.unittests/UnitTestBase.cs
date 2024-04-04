@@ -23,7 +23,7 @@ namespace assets2036net.unittests
         {
             string location = this.GetType().Assembly.Location;
             location = Path.GetDirectoryName(location);
-            location = Path.Combine(location, "resources/log4net.config");
+            location = Path.Combine(location, "resources/log4net.config.xml");
 
             XmlDocument log4netConfig = new XmlDocument();
             log4netConfig.Load(File.OpenRead(location));

@@ -577,35 +577,28 @@ namespace assets2036net
             _mqttClient.ConnectAsync(options, CancellationToken.None).Wait();
         }
 
-        internal void Publish(string topic, string text, bool retain)
+        internal void Publish(string topic, string text, bool retain, byte[] correlationData = null)
         {
             try
             {
                 lock (unpublishedMessagedLock)
                 {
+                    var messageBuilder = new MqttApplicationMessageBuilder(); 
+                    messageBuilder = messageBuilder.WithTopic(topic); 
+                    messageBuilder = messageBuilder.WithQualityOfServiceLevel(MQTTnet.Protocol.MqttQualityOfServiceLevel.ExactlyOnce); 
+                    messageBuilder = messageBuilder.WithRetainFlag(retain); 
+
                     if (text != null)
                     {
-                        var message = new MqttApplicationMessageBuilder()
-                            .WithTopic(topic)
-                            .WithPayload(text)
-                            .WithQualityOfServiceLevel(MQTTnet.Protocol.MqttQualityOfServiceLevel.ExactlyOnce)
-                            .WithRetainFlag(retain)
-                            .Build();
-
-                        _mqttClient.PublishAsync(message); 
-                        // Console.WriteLine($"Pub: {topic} {text} {retain}"); 
+                        messageBuilder = messageBuilder.WithPayload(text); 
                     }
-                    else
+
+                    if (correlationData != null)
                     {
-                        var message = new MqttApplicationMessageBuilder()
-                            .WithTopic(topic)
-                            .WithQualityOfServiceLevel(MQTTnet.Protocol.MqttQualityOfServiceLevel.ExactlyOnce)
-                            .WithRetainFlag(retain)
-                            .Build();
-
-                        _mqttClient.PublishAsync(message); 
-                        // Console.WriteLine($"Clean: {topic} {retain}"); 
+                        messageBuilder = messageBuilder.WithCorrelationData(correlationData); 
                     }
+
+                    _mqttClient.PublishAsync(messageBuilder.Build());
                 }
             }
             catch (Exception e)
@@ -626,15 +619,6 @@ namespace assets2036net
             }
         }
 
-        //private void _mqttClient_MqttMsgPublished(object sender, uPLibrary.Networking.M2Mqtt.Messages.MqttMsgPublishedEventArgs e)
-        //{
-        //    lock (unpublishedMessagedLock)
-        //    {
-        //        byte tmp;
-        //        unpublishedMessages.TryRemove(e.MessageId, out tmp);
-        //    }
-        //}
-
         private readonly object unpublishedMessagedLock = new object();
 
         private readonly static log4net.ILog log = Config.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType.FullName);
@@ -644,21 +628,6 @@ namespace assets2036net
         private readonly string _endpointName;
 
         private readonly ConcurrentDictionary<string, SubmodelOperationResponse> _mapReqIdResponse;
-
-        //private void Disconnect()
-        //{
-        //    try
-        //    {
-        //        if (_mqttClient != null)
-        //        {
-        //            _mqttClient.Disconnect();
-        //        }
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        log.Error(e);
-        //    }
-        //}
 
         private void _mqttClient_ConnectionClosed(object sender, EventArgs e)
         {
@@ -705,9 +674,7 @@ namespace assets2036net
                 }
 
                 string message = System.Text.Encoding.UTF8.GetString(eventArgs.ApplicationMessage.PayloadSegment.Array);
-
                 log.DebugFormat("AssetMgr {0} parsed message {1} @ {2}", assetName, message, eventArgs.ApplicationMessage.Topic);
-
                 Topic topic = new Topic(eventArgs.ApplicationMessage.Topic);
 
                 if (eventArgs.ApplicationMessage.Topic.EndsWith(StringConstants.StringConstant_REQ))
@@ -745,11 +712,11 @@ namespace assets2036net
 
                             var respObj = JsonSerializer.Deserialize<SubmodelOperationResponse>(message);
                             respObj.Populate(this, asset, submodel);
-                            //                            respObj.Name = topic.GetElementName();
                             respObj.Operation = operation;
 
                             if (!_mapReqIdResponse.TryAdd(respObj.RequestId, respObj))
                             {
+                                log.ErrorFormat("probably duplicate request id detected: {0}", respObj.RequestId); 
                             }
                         }
                         catch (Exception exc)

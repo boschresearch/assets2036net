@@ -56,7 +56,7 @@ namespace assets2036net
                 Parameters = parameters
             };
 
-            Asset.publish(
+            AssetMgr.Publish(
                 Topic,      
                 JsonSerializer.Serialize(emission, Tools.JsonSerializerOptions),
                 false);

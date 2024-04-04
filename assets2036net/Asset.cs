@@ -75,7 +75,8 @@ namespace assets2036net
         /// <summary>
         /// Returns the full asset's name in the form [namespace]/[name]. 
         /// </summary>
-        public string FullName {
+        public string FullName
+        {
             get {
                 return string.Format("{0}/{1}", this.Namespace, this.Name); 
             }
@@ -174,12 +175,6 @@ namespace assets2036net
         //        }
         //    }
         //}
-
-        internal void publish(string topic, string text, bool retain)
-        {
-            log.DebugFormat("Asset {0} pub: {1} @ {2}", Name, text, topic);
-            AssetMgr.Publish(topic, text, retain); 
-        }
 
         protected virtual void Dispose(bool disposing)
         {

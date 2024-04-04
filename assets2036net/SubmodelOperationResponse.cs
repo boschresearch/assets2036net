@@ -51,7 +51,7 @@ namespace assets2036net
         {
             string message = JsonSerializer.Serialize(this, Tools.JsonSerializerOptions); 
             log.Debug("Send: " + message); 
-            Asset.publish(
+            AssetMgr.Publish(
                 BuildTopic(this.Operation.Topic, StringConstants.StringConstant_RESP),
                 message, 
                 false);

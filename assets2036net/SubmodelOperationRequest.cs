@@ -141,11 +141,7 @@ namespace assets2036net
 
             var topic = BuildTopic(Operation.Topic, StringConstants.StringConstant_REQ); 
             log.DebugFormat("Send: {0} @ {1}", message, topic);
-            Asset.publish(
-                topic,
-                message,
-                false);
+            AssetMgr.Publish(topic, message, false); 
         }
-
-    }
+   }
 }

@@ -4,7 +4,6 @@ on:
   push:
     branches: 
       - main
-      - dotnet5
   pull_request:
     branches: [ main ]
 

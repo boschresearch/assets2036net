@@ -637,7 +637,7 @@ namespace assets2036net
         {
             return Task.Run(() =>
             {
-                log.Error("MQTT connectionClosed!");
+                log.Debug("MQTT connectionClosed!");
                 LostConnection?.Invoke();
             });
         }

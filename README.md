@@ -35,7 +35,7 @@ impossible to strictly hide unneccessary aspects of the API from the developer.
 ### assets2036net library
 
 - log4net	2.0.13	Apache-2.0
-- MQTTNet	3.1.1	MIT 
+- MQTTNet	4.3.2.930	MIT 
 
 ### assets2036 unittests
 - Microsoft.NET.Test.Sdk	17.0.0	MIT 

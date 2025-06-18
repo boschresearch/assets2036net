@@ -263,3 +263,4 @@ __pycache__/
 assets2036net/packAndPush.bat
 
 *.sln
+assets2036net/nugetapikey.txt

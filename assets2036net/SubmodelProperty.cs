@@ -83,10 +83,10 @@ namespace assets2036net
         {
             get
             {
-                if (Asset.Mode != Mode.Consumer)
-                {
-                    throw new Exception("You cannot read property values on an asset owner"); 
-                }
+                // if (Asset.Mode != Mode.Consumer)
+                // {
+                //     throw new Exception("You cannot read property values on an asset owner");
+                // }
 
                 return _value;
             }
@@ -94,7 +94,7 @@ namespace assets2036net
             {
                 if (Asset.Mode != Mode.Owner)
                 {
-                    throw new Exception("You cannot set property values on an asset proxy"); 
+                    throw new Exception("You cannot set property values on an asset proxy");
                 }
 
                 _value = value;
@@ -118,7 +118,7 @@ namespace assets2036net
         {
             if (Asset.Initialized())
             {
-                AssetMgr.Publish(Topic, null, true); 
+                AssetMgr.Publish(Topic, null, true);
             }
         }
 
@@ -126,15 +126,15 @@ namespace assets2036net
         {
             if (Asset.Initialized())
             {
-                string json = null; 
+                string json = null;
 
                 json = JsonSerializer.Serialize(
-                    _value, 
+                    _value,
                     Tools.JsonSerializerOptions);
 
                 if (json != _latestPublishedValueJson)
                 {
-                    AssetMgr.Publish(Topic, json, true); 
+                    AssetMgr.Publish(Topic, json, true);
                     _latestPublishedValueJson = json;
                 }
             }
@@ -150,11 +150,11 @@ namespace assets2036net
             {
                 if (Value == null)
                 {
-                    return null; 
+                    return null;
                 }
                 else
                 {
-                    return ((JsonElement)Value).GetString(); 
+                    return ((JsonElement)Value).GetString();
                 }
             }
         }
@@ -168,11 +168,11 @@ namespace assets2036net
             {
                 if (Value == null)
                 {
-                    return (int)0; 
+                    return (int)0;
                 }
                 else
                 {
-                    return (int)((JsonElement)Value).GetInt32(); 
+                    return (int)((JsonElement)Value).GetInt32();
                 }
             }
         }
@@ -186,11 +186,11 @@ namespace assets2036net
             {
                 if (Value == null)
                 {
-                    return 0.0f; 
+                    return 0.0f;
                 }
                 else
                 {
-                    return (double)((JsonElement)Value).GetDouble(); 
+                    return (double)((JsonElement)Value).GetDouble();
                 }
             }
         }
@@ -204,11 +204,11 @@ namespace assets2036net
             {
                 if (Value == null)
                 {
-                    return 0.0f; 
+                    return 0.0f;
                 }
                 else
                 {
-                    return (float)((JsonElement)Value).GetDouble(); 
+                    return (float)((JsonElement)Value).GetDouble();
                 }
             }
         }
@@ -223,11 +223,11 @@ namespace assets2036net
             {
                 if (Value == null)
                 {
-                    return false; 
+                    return false;
                 }
-                else 
+                else
                 {
-                    return ((JsonElement)Value).GetBoolean(); 
+                    return ((JsonElement)Value).GetBoolean();
                 }
             }
         }
@@ -240,7 +240,7 @@ namespace assets2036net
         {
             return ((JsonElement)Value).Deserialize<T>(
                 Tools.JsonSerializerOptions
-            ); 
+            );
         }
 
         /// <summary>
@@ -252,7 +252,7 @@ namespace assets2036net
             get
             {
                 return JsonSerializer.Deserialize<Dictionary<string, object>>(
-                    JsonSerializer.Serialize(Value)); 
+                    JsonSerializer.Serialize(Value));
             }
         }
 
@@ -263,7 +263,7 @@ namespace assets2036net
                 log.InfoFormat("{0} subscribes to {1}", Name, Topic);
                 return new HashSet<string>() { Topic };
             }
-            else return new HashSet<string>(); 
+            else return new HashSet<string>();
         }
     }
 }

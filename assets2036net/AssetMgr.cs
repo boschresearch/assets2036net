@@ -65,12 +65,12 @@ namespace assets2036net
             BrokerPort = port;
             Namespace = @namespace;
             _endpointName = endpointName;
-            _mqttKnownSessionId = knownSessionId; 
+            _mqttKnownSessionId = knownSessionId;
 
             _consumerAssets = new ConcurrentDictionary<string, ConcurrentBag<Asset>>();
             _ownerAssets = new ConcurrentDictionary<string, ConcurrentBag<Asset>>();
             _mapReqIdResponse = new ConcurrentDictionary<string, SubmodelOperationResponse>();
-            _mqttKnownSessionId = knownSessionId; 
+            _mqttKnownSessionId = knownSessionId;
 
             Connect();
 
@@ -102,11 +102,11 @@ namespace assets2036net
         /// </summary>
         public AssetEndpoint EndpointAsset { get; private set; }
 
-        
-        private CancellationTokenSource _healthyCallbackTaskCTS = null; 
-        private Task _healthyCallbackTask = null; 
-        private string _mqttKnownSessionId = ""; 
-        public TimeSpan HealthyCallbackRefreshRate {get;set;} = TimeSpan.FromSeconds(2); 
+
+        private CancellationTokenSource _healthyCallbackTaskCTS = null;
+        private Task _healthyCallbackTask = null;
+        private string _mqttKnownSessionId = "";
+        public TimeSpan HealthyCallbackRefreshRate { get; set; } = TimeSpan.FromSeconds(2);
 
         /// <summary>
         /// Set a callback which will be called periodically to check the healthy status of 
@@ -516,8 +516,8 @@ namespace assets2036net
 
                 if (_mqttClient != null && _mqttClient.IsConnected)
                 {
-                    _mqttClient.DisconnectAsync().Wait(); 
-                    _mqttClient = null; 
+                    _mqttClient.DisconnectAsync().Wait();
+                    _mqttClient = null;
                 }
 
                 disposedValue = true;
@@ -556,22 +556,22 @@ namespace assets2036net
                         Namespace,
                         _endpointName,
                         StringConstants.SubmodelNameEnpoint,
-                        StringConstants.PropertyNameOnline)); 
+                        StringConstants.PropertyNameOnline));
 
             if (_mqttKnownSessionId != "")
             {
                 optionsBuilder = optionsBuilder
                     .WithCleanSession(false)
-                    .WithClientId(_mqttKnownSessionId); 
+                    .WithClientId(_mqttKnownSessionId);
             }
             else
             {
                 optionsBuilder = optionsBuilder
                     .WithCleanSession(true)
-                    .WithClientId(_mqttClientId); 
+                    .WithClientId(_mqttClientId);
             }
 
-            var options = optionsBuilder.Build(); 
+            var options = optionsBuilder.Build();
 
             log.InfoFormat("{0} connects to {1}:{2}", _mqttClientId, BrokerHost, BrokerPort);
             _mqttClient.ConnectAsync(options, CancellationToken.None).Wait();
@@ -583,19 +583,19 @@ namespace assets2036net
             {
                 lock (unpublishedMessagedLock)
                 {
-                    var messageBuilder = new MqttApplicationMessageBuilder(); 
-                    messageBuilder = messageBuilder.WithTopic(topic); 
-                    messageBuilder = messageBuilder.WithQualityOfServiceLevel(MQTTnet.Protocol.MqttQualityOfServiceLevel.ExactlyOnce); 
-                    messageBuilder = messageBuilder.WithRetainFlag(retain); 
+                    var messageBuilder = new MqttApplicationMessageBuilder();
+                    messageBuilder = messageBuilder.WithTopic(topic);
+                    messageBuilder = messageBuilder.WithQualityOfServiceLevel(MQTTnet.Protocol.MqttQualityOfServiceLevel.ExactlyOnce);
+                    messageBuilder = messageBuilder.WithRetainFlag(retain);
 
                     if (text != null)
                     {
-                        messageBuilder = messageBuilder.WithPayload(text); 
+                        messageBuilder = messageBuilder.WithPayload(text);
                     }
 
                     if (correlationData != null)
                     {
-                        messageBuilder = messageBuilder.WithCorrelationData(correlationData); 
+                        messageBuilder = messageBuilder.WithCorrelationData(correlationData);
                     }
 
                     _mqttClient.PublishAsync(messageBuilder.Build());
@@ -716,7 +716,7 @@ namespace assets2036net
 
                             if (!_mapReqIdResponse.TryAdd(respObj.RequestId, respObj))
                             {
-                                log.ErrorFormat("probably duplicate request id detected: {0}", respObj.RequestId); 
+                                log.ErrorFormat("probably duplicate request id detected: {0}", respObj.RequestId);
                             }
                         }
                         catch (Exception exc)

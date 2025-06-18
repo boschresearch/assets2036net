@@ -238,9 +238,16 @@ namespace assets2036net
         /// </summary>
         public T ValueAs<T>() where T : new()
         {
-            return ((JsonElement)Value).Deserialize<T>(
-                Tools.JsonSerializerOptions
-            );
+            if (Value is T)
+            {
+                return (T)Value;
+            }
+            else
+            {
+                return ((JsonElement)Value).Deserialize<T>(
+                    Tools.JsonSerializerOptions
+                );
+            }
         }
 
         /// <summary>
